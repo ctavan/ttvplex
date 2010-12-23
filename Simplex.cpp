@@ -1,5 +1,8 @@
 #include "Simplex.h"
 
+using namespace std;
+using namespace cln;
+
 // Constructor
 Simplex::Simplex() {
 }

@@ -1,5 +1,8 @@
 #include "Log.h"
 
+using namespace std;
+using namespace cln;
+
 // Constructor
 Log::Log() {
 }

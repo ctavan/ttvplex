@@ -7,18 +7,28 @@ using namespace cln;
 // ((1+sqrt(5))/2)^n/sqrt(5). Assume n>=0.
 const cl_I fibonacci (int n)
 {
-        // Need a precision of ((1+sqrt(5))/2)^-n.
-        float_format_t prec = float_format((int)(0.208987641*n+5));
-        cl_R sqrt5 = sqrt(cl_float(5,prec));
-        cl_R phi = (1+sqrt5)/2;
-        return round1( expt(phi,n)/sqrt5 );
+	// Need a precision of ((1+sqrt(5))/2)^-n.
+	float_format_t prec = float_format((int)(0.208987641*n+5));
+	cl_R sqrt5 = sqrt(cl_float(5,prec));
+	cl_R phi = (1+sqrt5)/2;
+	return round1( expt(phi,n)/sqrt5 );
 }
 
 int main ()
 {
 	std::cout << "Hello World!" << std::endl;
 
-	// std::cout << fibonacci(10) << std::endl;
+	int n = 10;
+	{ CL_TIMING;
+		cout << "fib(" << n << ") = ";
+		for (int rep = 10; rep > 0; rep--)
+			fibonacci(n);
+		cout << fibonacci(n) << endl;
+	}
+
+	cl_RA rat = (cl_I)"21938129038091233132"/(cl_I)"2012390109283092183092183091283902183091283981209381209";
+	cout << "Rational: " << rat << " Numerator: " << numerator(rat) << " Denom: " << denominator(rat)  << endl;
+	cout << "Denom + 5: " << denominator(rat)+5 << endl;
 
 	Simplex smp;
 	smp.init();
