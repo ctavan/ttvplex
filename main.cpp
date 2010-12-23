@@ -29,6 +29,8 @@ int main ()
 	cl_RA rat = (cl_I)"21938129038091233132"/(cl_I)"2012390109283092183092183091283902183091283981209381209";
 	cout << "Rational: " << rat << " Numerator: " << numerator(rat) << " Denom: " << denominator(rat)  << endl;
 	cout << "Denom + 5: " << denominator(rat)+5 << endl;
+	rat = (cl_I)3/(cl_I)9;
+	cout << "3/9: " << rat << endl;
 
 	Simplex smp;
 	smp.init();
