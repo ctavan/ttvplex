@@ -19,14 +19,16 @@
 // We use the timing functions.
 #include <cln/timing.h>
 
+using namespace std;
+using namespace cln;
 
 class Log {
 
 	public:
 		Log();
 
-		void vector(std::vector<int> v, std::string name);
-		void matrix(std::vector< std::vector< int > > m, std::string name);
+		void vec(vector< cl_RA > v, string name);
+		void matrix(vector< vector<cl_RA> > m, string name);
 };
 
 #endif

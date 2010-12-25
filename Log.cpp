@@ -7,21 +7,22 @@ using namespace cln;
 Log::Log() {
 }
 
-void Log::vector(std::vector<int> v, std::string name)
+void Log::vec(vector< cl_RA > v, string name)
 {
-	std::cout << "Dumping " << v.size() << "-vector " << name << std::endl;
+	cout << "Dumping " << v.size() << "-vector " << name << ":" << endl;
 	for (unsigned i = 0; i < v.size(); i++) {
-		std::cout << name << "[" << i << "]\t=>\t" << v[i] << std::endl;
+		// cout << name << "[" << i << "]\t=>\t" << ;
+		cout << v[i] << endl;
 	}
 }
 
-void Log::matrix(std::vector< std::vector< int > > m, std::string name)
+void Log::matrix(vector< vector< cl_RA > > m, string name)
 {
-	std::cout << "Dumping " << m.size() << "x" << m[0].size() << " matrix " << name << std::endl;
+	cout << "Dumping " << m.size() << "x" << m[0].size() << " matrix " << name << ":" << endl;
 	for (unsigned i = 0; i < m.size(); i++) {
 		for (unsigned j = 0; j < m[i].size(); j++) {
-			std::cout << m[i][j] << "\t";
+			cout << m[i][j] << "\t";
 		}
-		std::cout << std::endl;
+		cout << endl;
 	}
 }

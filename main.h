@@ -19,8 +19,9 @@
 
 
 // Local includes
-#include "Simplex.h"
 #include "Log.h"
+#include "Matrix.h"
+#include "Simplex.h"
 
 
 #endif
