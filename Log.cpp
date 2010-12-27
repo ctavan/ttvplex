@@ -20,6 +20,13 @@ void Log::vec(vector< cl_RA > v, string name)
 		cout << v[i] << endl;
 	}
 }
+void Log::vec(vector< unsigned > v, string name)
+{
+	cout << "Dumping " << v.size() << "-vector " << name << ":" << endl;
+	for (unsigned i = 0; i < v.size(); i++) {
+		cout << v[i] << endl;
+	}
+}
 
 void Log::matrix(vector< vector< cl_RA > > m, string name)
 {

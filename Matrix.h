@@ -100,14 +100,26 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  vector m x n Matrix A
+	\param  vector Initial m x n Matrix A
+	\param  vector Final m x n Matrix B after pivoting
 	\param  int i Row-index of pivot element
-	\param  int i Column-index of pivot element
+	\param  int j Column-index of pivot element
 	\return void
 	\sa
 **/
 		static void pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > > & B, int i, int j);
-
+/** \brief Subtract row j from row i
+	
+	Subtracts row j of input matrix A from row i. The input matrix is manipulated directly.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2010-12-27
+	\param vector m x n Matrix A
+	\param int i Row-index of first row
+	\param int j Row-index of second row
+	\return void
+	\sa
+**/
 		static void rowSubtract(vector< vector< cl_RA > > & A, int i, int j);
 };
 

@@ -60,7 +60,7 @@ class Simplex {
 		vector< cl_RA > b; //!< Initial righthand side
 		vector< cl_RA > c; //!< Initial cost coefficients
 		vector< vector< cl_RA > > CARRY; //!< Carry^0-Matrix
-		vector< int > basis; //!< Index-set of current matrix columns
+		vector< unsigned > basis; //!< Index-set of current matrix columns
 };
 
 #endif

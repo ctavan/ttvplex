@@ -9,13 +9,13 @@
 #define DEBUG_LINES 1
 
 #define DEBUGPRINT2(...)       fprintf(stderr, __VA_ARGS__)
-// #if DEBUG_LINES >= 1
+#if DEBUG_LINES >= 1
 #define WHERESTR  "[file %s, line %d]: "
 #define WHEREARG  __FILE__, __LINE__
 #define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(WHERESTR _fmt, WHEREARG, __VA_ARGS__)
-// #else
-// #define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(_fmt, __VA_ARGS__)
-// #endif
+#else
+#define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(_fmt, __VA_ARGS__)
+#endif
 
 #if DEBUG_LEVEL >= 1
 #define WARN(...) DEBUGPRINT(__VA_ARGS__)
@@ -93,6 +93,7 @@ class Log {
 	\sa
 **/
 		static void vec(vector< cl_RA > v, string name);
+		static void vec(vector< unsigned > v, string name);
 /** \brief Dump a 2D-matrix
 	
 	\author Christoph Tavan TU Berlin
