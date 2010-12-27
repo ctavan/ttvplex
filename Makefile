@@ -24,8 +24,8 @@ Matrix.o: Matrix.cpp Matrix.h
 
 # Loeschen der object-Dateien und der Programmdatei
 clean:
-	@rm -rf docs/* 2>/dev/null
-	@rm *.o *~ $(PROGRAMNAME) 2>/dev/null
+	-rm -rf docs/* 2>/dev/null
+	-rm *.o $(PROGRAMNAME) 2>/dev/null
 
 doxy:
 	mkdir -p docs && doxygen doxygen.conf

@@ -20,6 +20,18 @@
 using namespace std;
 using namespace cln;
 
+/** \brief  Matrix manipulation class
+	
+	Class for matrix manipulation (like inverting, calculating determinants, etc.)
+	
+© Copyright 2010 TU Berlin - Christoph Tavan. All Rights Reserved.
+
+	\author Christoph Tavan TU Berlin
+	\author $LastChangedBy$
+	\date 2010-12-27
+	\date $LastChangedDate$
+	\version $Rev$	\sa
+**/
 class Matrix {
 
 	public:
@@ -31,7 +43,7 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  m x m Matrix A
+	\param  vector m x m Matrix A
 	\return cl_RA Value of the determinant
 	\sa
 **/
@@ -42,8 +54,8 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  m x m Matrix A
-	\param  Resulting m x m Matrix At
+	\param  vector m x m Matrix A
+	\param  vector Resulting m x m Matrix At
 	\return void
 	\sa
 **/
@@ -54,8 +66,8 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  m x m Matrix A
-	\param  m x m Matrix B
+	\param  vector m x m Matrix A
+	\param  vector m x m Matrix B
 	\param  Resulting m x m Matrix R = A . B
 	\return void
 	\sa
@@ -67,8 +79,8 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  m x m Matrix A
-	\param  m x m Matrix Ai
+	\param  vector m x m Matrix A
+	\param  vector m x m Matrix Ai
 	\return void
 	\sa
 **/
@@ -79,10 +91,10 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  m x n Matrix A
+	\param  vector m x n Matrix A
 	\param  int i Row-index of pivot element
 	\param  int i Column-index of pivot element
-	\return description of return value
+	\return void
 	\sa
 **/
 		void pivot(vector< vector< cl_RA > > A, int i, int j);

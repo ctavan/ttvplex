@@ -9,14 +9,12 @@ Simplex::Simplex() {
 
 void Simplex::init()
 {
-	Log log;
-
 	// Righthand side
 	b.clear();
 	b.push_back(1);
 	b.push_back(3);
 	b.push_back(4);
-	log.vec(b, "b");
+	Log::vec(b, "b");
 
 	// Matrix A
 	A.clear();
@@ -40,7 +38,7 @@ void Simplex::init()
 	A[2].push_back(1);
 	A[2].push_back(0);
 	A[2].push_back(1);
-	log.matrix(A, "A");
+	Log::matrix(A, "A");
 
 	// Cost coefficients c
 	c.clear();
@@ -49,7 +47,7 @@ void Simplex::init()
 	c.push_back(1);
 	c.push_back(1);
 	c.push_back(1);
-	log.vec(c, "c");
+	Log::vec(c, "c");
 
 	// Carry Matrix
 	CARRY.push_back(vector<cl_RA>());
@@ -76,7 +74,7 @@ void Simplex::init()
 	CARRY[3].push_back(0);
 	CARRY[3].push_back(0);
 	CARRY[3].push_back(1);
-	log.matrix(CARRY, "CARRY");
+	Log::matrix(CARRY, "CARRY");
 }
 
 void Simplex::phase2()
