@@ -7,6 +7,11 @@ using namespace cln;
 Log::Log() {
 }
 
+void Log::message(string text)
+{
+	cout << text << endl;
+}
+
 void Log::vec(vector< cl_RA > v, string name)
 {
 	cout << "Dumping " << v.size() << "-vector " << name << ":" << endl;

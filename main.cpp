@@ -18,6 +18,10 @@ int main ()
 {
 	std::cout << "Hello World!" << std::endl;
 
+	WARN("Hello %s %d\n", "World", 1);
+	INFO("Hello %s %d\n", "World", 2);
+	DEBUG("Hello %s %d %s\n", "World", 3, "test");
+
 	int n = 10;
 	{ CL_TIMING;
 		cout << "fib(" << n << ") = ";

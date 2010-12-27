@@ -4,7 +4,6 @@
 // C Standard libraries
 #include <iostream>
 
-
 // We work with integers and real numbers.
 #include <cln/integer.h>
 #include <cln/rational.h>

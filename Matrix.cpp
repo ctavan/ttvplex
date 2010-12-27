@@ -24,6 +24,31 @@ void Matrix::inverse(vector< vector< cl_RA > > A, vector< vector< cl_RA > > Ai)
 {
 }
 
-void Matrix::pivot(vector< vector< cl_RA > > A, int i, int j)
+void Matrix::pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > > & B, int i, int j)
 {
+	DEBUG("Pivoting on element: [%d][%d]\n", i, j);
+
+	// Make sure the target matrix B holds a copy of the inital matrix A
+	B = A;
+
+	for (unsigned r = 0; r < A.size(); r++) {
+		for (unsigned s = 0; s < A[r].size(); s++) {
+			// We're in the row of the pivot-element. Here only devide by the value of the pivot element
+			if ((int)r == i) {
+				B[r][s] = A[r][s]/A[i][j];
+				continue;
+			}
+			// Otherwise bring the j'th column of this row to 0
+			B[r][s] = A[r][s] - A[i][s] * A[r][j]/A[i][j] ;
+		}
+	}
+}
+
+void Matrix::rowSubtract(vector< vector< cl_RA > > & A, int i, int j)
+{
+	DEBUG("Subtracting: row[%d] - row[%d]\n", i, j);
+
+	for (unsigned s = 0; s < A[i].size(); s++) {
+		A[i][s] -= A[j][s];
+	}
 }

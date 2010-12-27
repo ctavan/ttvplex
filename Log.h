@@ -1,11 +1,45 @@
 #ifndef Log_h
 #define Log_h
 
+
+#include <stdio.h>
+
+// Some preprocessor macros for debugmessages
+#define DEBUG_LEVEL 3
+#define DEBUG_LINES 1
+
+#define DEBUGPRINT2(...)       fprintf(stderr, __VA_ARGS__)
+// #if DEBUG_LINES >= 1
+#define WHERESTR  "[file %s, line %d]: "
+#define WHEREARG  __FILE__, __LINE__
+#define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(WHERESTR _fmt, WHEREARG, __VA_ARGS__)
+// #else
+// #define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(_fmt, __VA_ARGS__)
+// #endif
+
+#if DEBUG_LEVEL >= 1
+#define WARN(...) DEBUGPRINT(__VA_ARGS__)
+#else
+#define WARN(...)
+#endif
+
+#if DEBUG_LEVEL >= 2
+#define INFO(...) DEBUGPRINT(__VA_ARGS__)
+#else
+#define INFO(...)
+#endif
+
+#if DEBUG_LEVEL >= 3
+#define DEBUG(...) DEBUGPRINT(__VA_ARGS__)
+#else
+#define DEBUG(...)
+#endif
+
+
 // C Standard libraries
 #include <iostream>
 #include <vector>
 #include <string>
-
 
 // We work with integers and real numbers.
 #include <cln/integer.h>
@@ -39,9 +73,17 @@ class Log {
 	public:
 		Log();
 
-/** \brief Dump a 1D-vector
+/** \brief Dump some string.
 	
-	Dump a 1D-vector
+	\author Christoph Tavan TU Berlin
+	\date 2010-12-27
+	\param string Message
+	\param  description of parameter
+	\return description of return value
+	\sa
+**/
+		static void message(string text);
+/** \brief Dump a 1D-vector
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-27
@@ -52,8 +94,6 @@ class Log {
 **/
 		static void vec(vector< cl_RA > v, string name);
 /** \brief Dump a 2D-matrix
-	
-	Dump a 2D-matrix
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-27

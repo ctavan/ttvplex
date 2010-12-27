@@ -2,7 +2,10 @@
 #define Matrix_h
 
 // C Standard libraries
+#include <iostream>
 #include <vector>
+#include <string>
+#include <sstream>
 
 
 // We work with integers and real numbers.
@@ -16,6 +19,12 @@
 #include <cln/real_io.h>
 // We use the timing functions.
 #include <cln/timing.h>
+
+
+// Local includes
+#include "Log.h"
+#include "Matrix.h"
+
 
 using namespace std;
 using namespace cln;
@@ -97,7 +106,9 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void pivot(vector< vector< cl_RA > > A, int i, int j);
+		static void pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > > & B, int i, int j);
+
+		static void rowSubtract(vector< vector< cl_RA > > & A, int i, int j);
 };
 
 #endif

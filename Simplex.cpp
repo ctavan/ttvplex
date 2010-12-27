@@ -50,6 +50,7 @@ void Simplex::init()
 	Log::vec(c, "c");
 
 	// Carry Matrix
+	CARRY.clear();
 	CARRY.push_back(vector<cl_RA>());
 	CARRY.push_back(vector<cl_RA>());
 	CARRY.push_back(vector<cl_RA>());
@@ -74,6 +75,84 @@ void Simplex::init()
 	CARRY[3].push_back(0);
 	CARRY[3].push_back(0);
 	CARRY[3].push_back(1);
+	Log::matrix(CARRY, "CARRY");
+
+
+	// Carry Matrix
+	CARRY.clear();
+	CARRY.push_back(vector<cl_RA>());
+	CARRY.push_back(vector<cl_RA>());
+	CARRY.push_back(vector<cl_RA>());
+	CARRY.push_back(vector<cl_RA>());
+	CARRY.push_back(vector<cl_RA>());
+
+	int i = 0;
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+
+	i++;
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+
+	i++;
+	CARRY[i].push_back(b[0]);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(3);
+	CARRY[i].push_back(2);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+
+	i++;
+	CARRY[i].push_back(b[1]);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(5);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(0);
+
+	i++;
+	CARRY[i].push_back(b[2]);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(2);
+	CARRY[i].push_back(5);
+	CARRY[i].push_back(1);
+	CARRY[i].push_back(0);
+	CARRY[i].push_back(1);
+	Log::matrix(CARRY, "CARRY");
+
+	Matrix::rowSubtract(CARRY, 1, 2);
+	Matrix::rowSubtract(CARRY, 1, 3);
+	Matrix::rowSubtract(CARRY, 1, 4);
+	Log::matrix(CARRY, "CARRY");
+	Matrix::pivot(CARRY, CARRY, 2, 4);
+	Log::matrix(CARRY, "CARRY");
+	Matrix::pivot(CARRY, CARRY, 2, 5);
+	Log::matrix(CARRY, "CARRY");
+	Matrix::pivot(CARRY, CARRY, 3, 7);
+	Log::matrix(CARRY, "CARRY");
+	Matrix::pivot(CARRY, CARRY, 4, 8);
 	Log::matrix(CARRY, "CARRY");
 }
 
