@@ -1,57 +1,14 @@
 #ifndef Log_h
 #define Log_h
 
-
-#include <stdio.h>
-
-// Some preprocessor macros for debugmessages
-#define DEBUG_LEVEL 3
-#define DEBUG_LINES 1
-
-#define DEBUGPRINT2(...)       fprintf(stderr, __VA_ARGS__)
-#if DEBUG_LINES >= 1
-#define WHERESTR  "[file %s, line %d]: "
-#define WHEREARG  __FILE__, __LINE__
-#define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(WHERESTR _fmt, WHEREARG, __VA_ARGS__)
-#else
-#define DEBUGPRINT(_fmt, ...)  DEBUGPRINT2(_fmt, __VA_ARGS__)
-#endif
-
-#if DEBUG_LEVEL >= 1
-#define WARN(...) DEBUGPRINT(__VA_ARGS__)
-#else
-#define WARN(...)
-#endif
-
-#if DEBUG_LEVEL >= 2
-#define INFO(...) DEBUGPRINT(__VA_ARGS__)
-#else
-#define INFO(...)
-#endif
-
-#if DEBUG_LEVEL >= 3
-#define DEBUG(...) DEBUGPRINT(__VA_ARGS__)
-#else
-#define DEBUG(...)
-#endif
-
-
 // C Standard libraries
 #include <iostream>
 #include <vector>
 #include <string>
 
-// We work with integers and real numbers.
-#include <cln/integer.h>
-#include <cln/rational.h>
-#include <cln/real.h>
-// We do I/O.
-#include <cln/io.h>
-#include <cln/integer_io.h>
-#include <cln/rational_io.h>
-#include <cln/real_io.h>
-// We use the timing functions.
-#include <cln/timing.h>
+// Class library for numbers
+#include "cln.h"
+
 
 using namespace std;
 using namespace cln;
@@ -68,10 +25,31 @@ using namespace cln;
 	\date $LastChangedDate$
 	\version $Rev$	\sa
 **/
-class Log {
+class Log: public ostream{
 
 	public:
-		Log();
+		Log(ostream& out, int level);
+		~Log();
+
+		int level;
+
+		template <typename T> Log& operator<<(const T& value)
+		{
+			if (level > 0) {
+				(ostream&)*this << value;
+			}
+			return *this;
+		}
+		// Log& operator<< (const string& value)
+		// {
+		// 	(ostream&)*this << '*' << value << '*';
+		// 	return *this;
+		// }
+		// Log& operator<< (const char* cstr)
+		// {
+		// 	(ostream&)*this << '(' << cstr << ')';
+		// 	return *this;
+		// }
 
 /** \brief Dump some string.
 	
@@ -82,7 +60,7 @@ class Log {
 	\return description of return value
 	\sa
 **/
-		static void message(string text);
+		void message(string text);
 /** \brief Dump a 1D-vector
 	
 	\author Christoph Tavan TU Berlin
@@ -92,8 +70,8 @@ class Log {
 	\return void
 	\sa
 **/
-		static void vec(vector< cl_RA > v, string name);
-		static void vec(vector< unsigned > v, string name);
+		void vec(vector< cl_RA > v, string name);
+		void vec(vector< unsigned > v, string name);
 /** \brief Dump a 2D-matrix
 	
 	\author Christoph Tavan TU Berlin
@@ -103,7 +81,7 @@ class Log {
 	\return description of return value
 	\sa
 **/
-		static void matrix(vector< vector<cl_RA> > m, string name);
+		void matrix(vector< vector<cl_RA> > m, string name);
 };
 
 #endif

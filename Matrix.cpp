@@ -24,9 +24,9 @@ void Matrix::inverse(vector< vector< cl_RA > > A, vector< vector< cl_RA > > Ai)
 {
 }
 
-void Matrix::pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > > & B, int i, int j)
+void Matrix::pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > >& B, int i, int j)
 {
-	DEBUG("Pivoting on element: [%d][%d]\n", i, j);
+	ldbg << "Pivoting on element: [" << i << "][" << j << "]\n";
 
 	// Make sure the target matrix B holds a copy of the inital matrix A
 	B = A;
@@ -44,9 +44,9 @@ void Matrix::pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > > & B, i
 	}
 }
 
-void Matrix::rowSubtract(vector< vector< cl_RA > > & A, int i, int j)
+void Matrix::rowSubtract(vector< vector< cl_RA > >& A, int i, int j)
 {
-	DEBUG("Subtracting: row[%d] - row[%d]\n", i, j);
+	ldbg << "Subtracting: row[" << i << "] - row[" << j << "]\n";
 
 	for (unsigned s = 0; s < A[i].size(); s++) {
 		A[i][s] -= A[j][s];

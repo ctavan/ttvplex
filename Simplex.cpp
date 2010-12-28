@@ -5,6 +5,7 @@ using namespace cln;
 
 // Constructor
 Simplex::Simplex() {
+	optimal = false;
 }
 
 void Simplex::init()
@@ -20,7 +21,7 @@ void Simplex::init()
 	b.push_back(1);
 	b.push_back(3);
 	b.push_back(4);
-	Log::vec(b, "b");
+	ldbg.vec(b, "b");
 
 	// Matrix A
 	A.clear();
@@ -44,7 +45,7 @@ void Simplex::init()
 	A[2].push_back(1);
 	A[2].push_back(0);
 	A[2].push_back(1);
-	Log::matrix(A, "A");
+	ldbg.matrix(A, "A");
 
 	// Cost coefficients c
 	c.clear();
@@ -53,7 +54,7 @@ void Simplex::init()
 	c.push_back(1);
 	c.push_back(1);
 	c.push_back(1);
-	Log::vec(c, "c");
+	ldbg.vec(c, "c");
 
 
 	// Carry Matrix
@@ -118,21 +119,21 @@ void Simplex::init()
 	CARRY[i].push_back(1);
 	CARRY[i].push_back(0);
 	CARRY[i].push_back(1);
-	Log::matrix(CARRY, "CARRY");
+	ldbg.matrix(CARRY, "CARRY");
 
 	Matrix::rowSubtract(CARRY, 1, 2);
 	Matrix::rowSubtract(CARRY, 1, 3);
 	Matrix::rowSubtract(CARRY, 1, 4);
-	Log::matrix(CARRY, "CARRY");
+	ldbg.matrix(CARRY, "CARRY");
 	Matrix::pivot(CARRY, CARRY, 2, 4);
-	Log::matrix(CARRY, "CARRY");
+	ldbg.matrix(CARRY, "CARRY");
 	Matrix::pivot(CARRY, CARRY, 2, 5);
-	Log::matrix(CARRY, "CARRY");
+	ldbg.matrix(CARRY, "CARRY");
 	Matrix::pivot(CARRY, CARRY, 3, 7);
-	Log::matrix(CARRY, "CARRY");
+	ldbg.matrix(CARRY, "CARRY");
 	Matrix::pivot(CARRY, CARRY, 4, 8);
-	Log::matrix(CARRY, "CARRY");
-	Log::message("=================");
+	ldbg.matrix(CARRY, "CARRY");
+	ldbg.message("=================");
 
 	// Carry-Matrix
 	CARRY.clear();
@@ -164,81 +165,36 @@ void Simplex::init()
 	CARRY[i].push_back(0);
 	CARRY[i].push_back(0);
 	CARRY[i].push_back(1);
-	Log::matrix(CARRY, "CARRY");
+	ldbg.matrix(CARRY, "CARRY");
 
-	bool optimal = false;
-	int counter = 0;
-	const int max_iterations = 1000;
-	
-	unsigned m = A.size();
-	unsigned n = A[0].size();
-	cout << "Dimension of the problem m x n: " << m << " x " << n << endl;
-	
+	// Size of the problem. The real tableau would have size (m+1) x (n+1).
+	// The carry-matrix has size (m+1) x (m+1)
+	// The coefficient-matrix has size m x n
+	// There are n cost-coefficients
+	m = A.size();		// Rows of the problem
+	n = A[0].size();	// Columns of the problem
+	lout << "Dimension of the coefficient matrix A: " << m << " x " << n;
+
+	int counter = 0;					// Counter to avoid infinite loops
+	const int max_iterations = 1000;	// Maximum number of iterations to be performed
+
+	// Repeat simplex algorithm until an optimal solution is found
 	while (optimal == false) {
-		counter++;
+
+		// In the beginning of each cycle we set optimal = false. If we get optimal in this cycle
+		// this variable will be set to true by the pricing routine.
+		optimal = false;
 
 		// Pricing
-		unsigned s = 0;
-		optimal = false;
-		vector<cl_RA> costs;
-		for (unsigned j = 0; j < n; j++) {
-			bool isBasic = false;
-
-			for (unsigned k = 0; k < basis.size(); k++) {
-				cout << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column. basis[" << k << "] = " << basis[k] << endl;
-				if (basis[k] == (j+basis.size()+1)) {
-					cout << "Column " << (j+basis.size()+1) << "is already in the basis" << endl;
-					isBasic = true;
-					break;
-				}
-			}
-			if (isBasic == true) {
-				costs.push_back(0);
-				continue;
-			}
-
-			// pi^T A_j
-			cl_RA cost = 0;
-			for (unsigned k = 1; k < (m+1); k++) {
-				cost += CARRY[0][k]*A[k-1][j];
-				cout << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << endl;
-			}
-			cout << "Cost c = " << cost << endl;
-
-			cl_RA d = 0;
-			for (unsigned k = 0; k < m; k++) {
-				d -= A[k][j];
-			}
-			cout << "d = " << d << endl;
-			cost = d + cost;
-			costs.push_back(cost);
-
-			cout << "Reduced cost = " << cost << endl;
-			if (cost < 0) {
-				cout << "Reduced cost = " << cost << " < 0 at column j = " << j << endl;
-				// s = j;
-				// optimal = false;
-				// break;
-			}
-		}
-		Log::vec(costs, "costs");
-		cl_RA min_cost = costs[0];
-		// Find minimum cost
-		for (unsigned i = 1; i < costs.size(); i++) {
-			if (costs[i] < min_cost) {
-				min_cost = costs[i];
-				s = i;
-			}
-		}
-		cout << "Minimum reduced cost = " << min_cost << " for index s = " << s << endl;
-		if (min_cost >= 0) {
-			cout << "All minimum reduced costs > 0 => we're optimal!" << endl;
-			optimal = true;
-			Log::matrix(CARRY, "CARRY");
-			Log::vec(basis, "basis");
+		cl_RA s_cost;				// Reduced cost of the column that will enter the basis
+		int s = pricing(s_cost);	// Index of the column that will enter the basis wrt. the matrix A
+		lout << "Pricing operation selected column: " << s << " with reduced cost " << s_cost << "\n";
+		if (optimal == true) {
+			lout << "All minimum reduced costs > 0 => we're optimal!" << "\n";
+			ldbg.matrix(CARRY, "CARRY");
+			ldbg.vec(basis, "basis");
 			break;
 		}
-		// We have found the column (index s) that should enter the basis
 
 		// Column generation
 		vector< cl_RA > Xs;
@@ -246,54 +202,54 @@ void Simplex::init()
 		for (unsigned i = 1; i < (m+1); i++) { // loop through rows
 			cl_RA row_sum = 0;
 			for (unsigned j = 1; j < (m+1); j++) {
-				cout << "Indices: " << i << "," << j << "," << s << endl;
+				cout << "Indices: " << i << "," << j << "," << s << "\n";
 				row_sum += CARRY[i][j]*A[j-1][s];
 			}
 			Xs.push_back(row_sum);
 		}
-		Log::vec(Xs, "Xs");
+		ldbg.vec(Xs, "Xs");
 
 		// Determine pivot element
 		cl_RA min = -1;
 		unsigned r = 0;
 		for (unsigned i = 1; i < (m+1); i++) {
 			if (Xs[i-1] == 0) {
-				cout << "Xs[" << (i-1) << "] == 0" << endl;
+				cout << "Xs[" << (i-1) << "] == 0" << "\n";
 				continue;
 			}
 			cl_RA cur = CARRY[i][0]/Xs[i-1];
-			cout << "Pivot here? " << cur << endl;
+			cout << "Pivot here? " << cur << "\n";
 			if (cur < 0) {
-				cout << "Current value negative: " << cur << endl;
+				cout << "Current value negative: " << cur << "\n";
 				continue;
 			}
 			if (min < 0 || (min > 0 && cur < min)) {
 				min = cur;
 				r = i-1;
-				cout << "r = " << r << " seems to be a suitable pivot element." << endl;
+				cout << "r = " << r << " seems to be a suitable pivot element." << "\n";
 			}
 		}
 		if (min < 0) {
-			cout << "ERROR: cost seems to be unbounded" << endl;
+			cout << "ERROR: cost seems to be unbounded" << "\n";
 		}
 
-		cout << "Pivot element determined: r,s = " << r << "," << s << endl;
+		cout << "Pivot element determined: r,s = " << r << "," << s << "\n";
 		// Pivot
 
 		// Make sure the target matrix B holds a copy of the inital matrix A
 		vector< vector< cl_RA > > CARRY_Xs;
 		CARRY_Xs = CARRY;
-		CARRY_Xs[0].push_back(costs[s]);
+		CARRY_Xs[0].push_back(s_cost);
 		CARRY_Xs[1].push_back(Xs[0]);
 		CARRY_Xs[2].push_back(Xs[1]);
 		CARRY_Xs[3].push_back(Xs[2]);
 
-		Log::matrix(CARRY_Xs, "CARRY_Xs");
+		ldbg.matrix(CARRY_Xs, "CARRY_Xs");
 		Matrix::pivot(CARRY_Xs, CARRY_Xs, r+1, CARRY_Xs[0].size()-1);
-		Log::matrix(CARRY_Xs, "CARRY_Xs");
+		ldbg.matrix(CARRY_Xs, "CARRY_Xs");
 
 		basis[r] = CARRY[0].size()+s;
-		Log::vec(basis, "basis");
+		ldbg.vec(basis, "basis");
 
 		// Update carry matrix
 		for (unsigned i = 0; i < CARRY.size(); i++) {
@@ -303,11 +259,70 @@ void Simplex::init()
 		}
 
 		if (counter > max_iterations) {
-			optimal = true;
+			ldbg.message("Still no result after max_iterations");
+			break;
 		}
+		counter++;
 	}
 }
 
 void Simplex::phase2()
 {
+}
+
+unsigned Simplex::pricing(cl_RA &cost_s)
+{
+	int s = 0;
+	vector<cl_RA> costs;
+	for (unsigned j = 0; j < n; j++) {
+		bool is_basic = false;
+
+		for (unsigned k = 0; k < basis.size(); k++) {
+			ldbg << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column. basis[" << k << "] = " << basis[k] << "\n";
+			if (basis[k] == (j+basis.size()+1)) {
+				cout << "Column " << (j+basis.size()+1) << "is already in the basis" << "\n";
+				is_basic = true;
+				break;
+			}
+		}
+		if (is_basic == true) {
+			costs.push_back(1); // Set positive fake cost to fill up the costs-vector
+			continue;
+		}
+
+		// pi^T A_j
+		cl_RA cost = 0;
+		for (unsigned k = 1; k < (m+1); k++) {
+			cost += CARRY[0][k]*A[k-1][j];
+			cout << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+		}
+		cout << "Cost c = " << cost << "\n";
+
+		cl_RA d = 0;
+		for (unsigned k = 0; k < m; k++) {
+			d -= A[k][j];
+		}
+		cout << "d = " << d << "\n";
+		cost = d + cost;
+		costs.push_back(cost);
+
+		cout << "Reduced cost = " << cost << "\n";
+	}
+	ldbg.vec(costs, "costs");
+	cl_RA min_cost = costs[0];
+	// Find minimum cost
+	for (unsigned i = 1; i < costs.size(); i++) {
+		if (costs[i] < min_cost) {
+			min_cost = costs[i];
+			s = (int)i;
+		}
+	}
+	cout << "Minimum reduced cost = " << min_cost << " for index s = " << s << "\n";
+	if (min_cost >= 0) {
+		optimal = true;
+		return 0;
+	}
+	cost_s = costs[s];
+	// We have found the column (index s) that should enter the basis
+	return s;
 }
