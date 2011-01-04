@@ -4,7 +4,8 @@ using namespace std;
 using namespace cln;
 
 // Constructor
-Matrix::Matrix() {
+Matrix::Matrix()
+{
 }
 
 cl_RA Matrix::det(vector< vector< cl_RA > > A)

@@ -8,7 +8,7 @@ CLN_LIB = /opt/local/lib/libcln.a
 GMP_LIB = /opt/local/lib/libgmp.a
 
 # Include paths that should be searched
-INCLUDE = -I$(CLN_INC)
+INCLUDE = -I$(CLN_INC) -I./
 # C compiler command. We use the GNU C++ compiler
 CC = g++
 # Compiler flags

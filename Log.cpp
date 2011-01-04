@@ -13,23 +13,25 @@ Log::~Log()
 
 void Log::message(string text)
 {
-	cout << text << endl;
+	if (level < 1) {
+		return;
+	}
+	(ostream&)*this << text << endl;
 }
 
 void Log::vec(vector< cl_RA > v, string name)
 {
-	if (level < 0) {
+	if (level < 1) {
 		return;
 	}
 	(ostream&)*this << "Dumping " << v.size() << "-vector " << name << ":" << endl;
 	for (unsigned i = 0; i < v.size(); i++) {
-		// cout << name << "[" << i << "]\t=>\t" << ;
 		(ostream&)*this << v[i] << endl;
 	}
 }
 void Log::vec(vector< unsigned > v, string name)
 {
-	if (level < 0) {
+	if (level < 1) {
 		return;
 	}
 	(ostream&)*this << "Dumping " << v.size() << "-vector " << name << ":" << endl;
@@ -40,7 +42,7 @@ void Log::vec(vector< unsigned > v, string name)
 
 void Log::matrix(vector< vector< cl_RA > > m, string name)
 {
-	if (level < 0) {
+	if (level < 1) {
 		return;
 	}
 	(ostream&)*this << "Dumping " << m.size() << "x" << m[0].size() << " matrix " << name << ":" << endl;

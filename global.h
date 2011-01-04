@@ -15,9 +15,10 @@
 #include "Simplex.h"
 
 
-// Global variables (just for logging/output)
-extern Log lout;
-extern Log ldbg;
-extern Log lerr;
+// Global variables for logging/output
+extern Log lout;	//!< Standard output of the program (not controlled by verbosity), shown if verbosity >= 1 (default)
+extern Log lerr;	//!< Error output (not controlled by verbosity), shown if verbosity >= 1 (default)
+extern Log linf;	//!< Info output, shown if verbosity >= 2
+extern Log ldbg;	//!< Debug output, shown if verbosity >= 3
 
 #endif

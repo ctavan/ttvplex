@@ -3,16 +3,59 @@
 using namespace std;
 using namespace cln;
 
-int main ()
+int main(int argc, char** argv)
 {
-	lout << "Hello World!\n";
+	// Handle commandline arguments using the nice TCLAP library
+	// @see http://tclap.sourceforge.net/
+	//
+	// Wrap everything in a try block. Do this every time, 
+	// because exceptions will be thrown for problems.
+	try {
+		// ============ Define available arguments ============
 
-	// CLN-Test
-	cl_RA rat = (cl_I)"21938129038091233132"/(cl_I)"2012390109283092183092183091283902183091283981209381209";
-	lout << "Rational: " << rat << " Numerator: " << numerator(rat) << " Denom: " << denominator(rat)  << "\n";
-	lout << "Denom + 5: " << denominator(rat)+5 << "\n";
-	rat = (cl_I)3/(cl_I)9;
-	lout << "3/9: " << rat << "\n";
+		// Define the command line object, and insert a message
+		// that describes the program. The "Command description message" 
+		// is printed last in the help text. The second argument is the 
+		// delimiter (usually space) and the last one is the version number. 
+		// The CmdLine object parses the argv array based on the Arg objects
+		// that it contains. 
+		TCLAP::CmdLine cmd("TTVPlex - Revised Simplex Algorithm", ' ', "0.1");
+
+		// Define a value argument and add it to the command line.
+		// A value arg defines a flag and a type of value that it expects,
+		// such as "-n Bishop".
+		TCLAP::ValueArg<int> verbosityArg("v","verbosity","Verbosity of output (0 to 3)", false, 1, "int");
+
+		// Add the argument nameArg to the CmdLine object. The CmdLine object
+		// uses this Arg to parse the command line.
+		cmd.add( verbosityArg );
+
+		// Parse the argv array.
+		cmd.parse( argc, argv );
+
+
+		// ============ Postprocess some of the arguments ============
+
+		// Get the value parsed by each arg. 
+		int verbosity = verbosityArg.getValue();
+
+		lout << "Verbosity of output: " << verbosity << "\n";
+		if (verbosity < 3) {
+			ldbg.level = 0;
+		}
+		if (verbosity < 2) {
+			linf.level = 0;
+		}
+		if (verbosity < 1) {
+			lout.level = 0;
+			lerr.level = 0;
+		}
+
+	}
+	catch (TCLAP::ArgException &e)  // catch any exceptions
+	{
+		cerr << "error: " << e.error() << " for arg " << e.argId() << endl; 
+	}
 
 	Simplex smp;
 	smp.init();
