@@ -165,7 +165,7 @@ void Simplex::init()
 	CARRY[i].push_back(0);
 	CARRY[i].push_back(0);
 	CARRY[i].push_back(1);
-	ldbg.matrix(CARRY, "CARRY");
+	linf.matrix(CARRY, "CARRY");
 
 	// Size of the problem. The real tableau would have size (m+1) x (n+1).
 	// The carry-matrix has size (m+1) x (m+1)
@@ -188,52 +188,54 @@ void Simplex::init()
 		// Pricing
 		cl_RA s_cost;				// Reduced cost of the column that will enter the basis
 		int s = pricing(s_cost);	// Index of the column that will enter the basis wrt. the matrix A
-		lout << "Pricing operation selected column: " << s << " with reduced cost " << s_cost << "\n";
+		linf << "Pricing operation selected column: " << s << " with reduced cost " << s_cost << "\n";
 		if (optimal == true) {
 			lout << "All minimum reduced costs > 0 => we're optimal!" << "\n";
-			ldbg.matrix(CARRY, "CARRY");
-			ldbg.vec(basis, "basis");
+			linf.matrix(CARRY, "CARRY");
+			linf.vec(basis, "basis");
 			break;
 		}
 
 		// Column generation
+		ldbg << "Starting column generation.\n";
 		vector< cl_RA > Xs;
 		Xs.clear();
 		for (unsigned i = 1; i < (m+1); i++) { // loop through rows
 			cl_RA row_sum = 0;
 			for (unsigned j = 1; j < (m+1); j++) {
-				cout << "Indices: " << i << "," << j << "," << s << "\n";
+				ldbg << "Indices: " << i << "," << j << "," << s << "\n";
 				row_sum += CARRY[i][j]*A[j-1][s];
 			}
 			Xs.push_back(row_sum);
 		}
-		ldbg.vec(Xs, "Xs");
+		linf << "Generated column:\n";
+		linf.vec(Xs, "Xs");
 
 		// Determine pivot element
 		cl_RA min = -1;
 		unsigned r = 0;
 		for (unsigned i = 1; i < (m+1); i++) {
 			if (Xs[i-1] == 0) {
-				cout << "Xs[" << (i-1) << "] == 0" << "\n";
+				ldbg << "Xs[" << (i-1) << "] == 0" << "\n";
 				continue;
 			}
 			cl_RA cur = CARRY[i][0]/Xs[i-1];
-			cout << "Pivot here? " << cur << "\n";
+			ldbg << "Pivot here? " << cur << "\n";
 			if (cur < 0) {
-				cout << "Current value negative: " << cur << "\n";
+				ldbg << "Current value negative: " << cur << "\n";
 				continue;
 			}
 			if (min < 0 || (min > 0 && cur < min)) {
 				min = cur;
 				r = i-1;
-				cout << "r = " << r << " seems to be a suitable pivot element." << "\n";
+				linf << "r = " << r << " seems to be a suitable pivot element." << "\n";
 			}
 		}
 		if (min < 0) {
-			cout << "ERROR: cost seems to be unbounded" << "\n";
+			lerr << "ERROR: cost seems to be unbounded" << "\n";
 		}
 
-		cout << "Pivot element determined: r,s = " << r << "," << s << "\n";
+		linf << "Pivot element determined: r,s = " << r << "," << s << "\n";
 		// Pivot
 
 		// Make sure the target matrix B holds a copy of the inital matrix A
@@ -249,7 +251,7 @@ void Simplex::init()
 		ldbg.matrix(CARRY_Xs, "CARRY_Xs");
 
 		basis[r] = CARRY[0].size()+s;
-		ldbg.vec(basis, "basis");
+		linf.vec(basis, "basis");
 
 		// Update carry matrix
 		for (unsigned i = 0; i < CARRY.size(); i++) {
@@ -259,7 +261,7 @@ void Simplex::init()
 		}
 
 		if (counter > max_iterations) {
-			ldbg.message("Still no result after max_iterations");
+			lerr << "Still no result after max_iterations\n";
 			break;
 		}
 		counter++;
@@ -280,7 +282,7 @@ unsigned Simplex::pricing(cl_RA &cost_s)
 		for (unsigned k = 0; k < basis.size(); k++) {
 			ldbg << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column. basis[" << k << "] = " << basis[k] << "\n";
 			if (basis[k] == (j+basis.size()+1)) {
-				cout << "Column " << (j+basis.size()+1) << "is already in the basis" << "\n";
+				ldbg << "Column " << (j+basis.size()+1) << "is already in the basis" << "\n";
 				is_basic = true;
 				break;
 			}
@@ -294,19 +296,19 @@ unsigned Simplex::pricing(cl_RA &cost_s)
 		cl_RA cost = 0;
 		for (unsigned k = 1; k < (m+1); k++) {
 			cost += CARRY[0][k]*A[k-1][j];
-			cout << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+			ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
 		}
-		cout << "Cost c = " << cost << "\n";
+		ldbg << "Cost c = " << cost << "\n";
 
 		cl_RA d = 0;
 		for (unsigned k = 0; k < m; k++) {
 			d -= A[k][j];
 		}
-		cout << "d = " << d << "\n";
+		ldbg << "d = " << d << "\n";
 		cost = d + cost;
 		costs.push_back(cost);
 
-		cout << "Reduced cost = " << cost << "\n";
+		ldbg << "Reduced cost = " << cost << "\n";
 	}
 	ldbg.vec(costs, "costs");
 	cl_RA min_cost = costs[0];
@@ -317,7 +319,7 @@ unsigned Simplex::pricing(cl_RA &cost_s)
 			s = (int)i;
 		}
 	}
-	cout << "Minimum reduced cost = " << min_cost << " for index s = " << s << "\n";
+	ldbg << "Minimum reduced cost = " << min_cost << " for index s = " << s << "\n";
 	if (min_cost >= 0) {
 		optimal = true;
 		return 0;

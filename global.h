@@ -3,6 +3,7 @@
 
 // C Standard libraries
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 
@@ -12,7 +13,6 @@
 // Local includes
 #include "Log.h"
 #include "Matrix.h"
-#include "Simplex.h"
 
 
 // Global variables for logging/output

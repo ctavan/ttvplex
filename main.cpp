@@ -5,6 +5,8 @@ using namespace cln;
 
 int main(int argc, char** argv)
 {
+	// Some variables that will be filled with values given through the commandline
+	string input;	// Inputfilename
 	// Handle commandline arguments using the nice TCLAP library
 	// @see http://tclap.sourceforge.net/
 	//
@@ -25,10 +27,14 @@ int main(int argc, char** argv)
 		// A value arg defines a flag and a type of value that it expects,
 		// such as "-n Bishop".
 		TCLAP::ValueArg<int> verbosityArg("v","verbosity","Verbosity of output (0 to 3)", false, 1, "int");
-
 		// Add the argument nameArg to the CmdLine object. The CmdLine object
 		// uses this Arg to parse the command line.
 		cmd.add( verbosityArg );
+
+
+		TCLAP::ValueArg<string> inputArg("i","input","Input LP file", true, "", "string");
+		cmd.add( inputArg );
+
 
 		// Parse the argv array.
 		cmd.parse( argc, argv );
@@ -51,11 +57,18 @@ int main(int argc, char** argv)
 			lerr.level = 0;
 		}
 
+		input = inputArg.getValue();
 	}
 	catch (TCLAP::ArgException &e)  // catch any exceptions
 	{
 		cerr << "error: " << e.error() << " for arg " << e.argId() << endl; 
 	}
+
+
+	LPParser lp(input);
+	lp.read();
+
+	exit(EXIT_SUCCESS);
 
 	Simplex smp;
 	smp.init();

@@ -22,8 +22,8 @@ LIBS = $(GMP_LIB) $(CLN_LIB)
 PROGRAMNAME = ttvplex
 
 # Default target invoked by 'make' or 'make default'
-default: main.cpp main.o global.o Simplex.o Log.o Matrix.o
-	$(CC) $(CFLAGS) $(INCLUDE) $(LDFLAGS) -o $(PROGRAMNAME) main.o global.o Simplex.o Log.o Matrix.o $(LIBS)
+default: main.cpp main.o global.o Simplex.o Log.o Matrix.o LPParser.o
+	$(CC) $(CFLAGS) $(INCLUDE) $(LDFLAGS) -o $(PROGRAMNAME) main.o global.o Simplex.o Log.o Matrix.o LPParser.o $(LIBS)
 
 # Dependencies
 main.o: main.cpp main.h
@@ -31,6 +31,7 @@ global.o: global.cpp global.h
 Simplex.o: Simplex.cpp Simplex.h
 Log.o: Log.cpp Log.h
 Matrix.o: Matrix.cpp Matrix.h
+LPParser.o: LPParser.cpp LPParser.h
 
 # Create or refresh an object-file
 # $< will be replaced by the name of the cpp-file
