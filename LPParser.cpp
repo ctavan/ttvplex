@@ -30,8 +30,9 @@ void LPParser::read()
 
 	section = SEC_START;
 
-	// Index of current constraint being processed
-	int cur_constraint = -1;
+	// Variables needed, since constraints can be split over multiple lines
+	int constraint_cur = -1; // Index of current constraint being processed
+	bool constraint_rhs = false; // Is set to true, if the relation-symbol af a constraint has been passed
 
 	while (lpfile.good() && section != SEC_END)
 	{
@@ -86,6 +87,22 @@ void LPParser::read()
 			section = SEC_BOUNDS;
 			continue;
 		}
+		if (   line.find("generals") != string::npos
+		 	|| line.find("general") != string::npos
+		 	|| line.find("gen") != string::npos )
+		{
+			linf << "LPParser: Entering section GENERALS\n";
+			section = SEC_GENERALS;
+			continue;
+		}
+		if (   line.find("binaries") != string::npos
+		 	|| line.find("binary") != string::npos
+		 	|| line.find("bin") != string::npos )
+		{
+			linf << "LPParser: Entering section BINARIES\n";
+			section = SEC_BINARIES;
+			continue;
+		}
 		if (   line.find("end") != string::npos )
 		{
 			linf << "LPParser: Entering section END\n";
@@ -134,14 +151,14 @@ void LPParser::read()
 
 			case SEC_CONSTRAINTS:
 				constraint_finished = false;
-				// cur_constraint = -1 means we need to add a new constraint
-				if (cur_constraint == -1)
+				// constraint_cur = -1 means we need to add a new constraint
+				if (constraint_cur == -1)
 				{
 					constraints.push_back(constr);
-					cur_constraint = constraints.size()-1;
+					constraint_cur = constraints.size()-1;
 				}
 				// Get current constraint into variable for convenience
-				constr = constraints[cur_constraint];
+				constr = constraints[constraint_cur];
 				// If name was given, use it
 				if (name.size() > 0)
 				{
@@ -152,9 +169,10 @@ void LPParser::read()
 				ldbg.vec(parts, "Parts of the line");
 				for (unsigned i = 0; i < parts.size(); i++)
 				{
-					// If the relation has been reached we stop parsing more variables
-					if (parts[i] == ">" || parts[i] == "<" || parts[i] == "=")
+					// If the relation has been reached set constraint_rhs = true
+					if (parts[i].find_first_of("<>=") != string::npos)
 					{
+						// Set relation
 						if (parts[i] == ">")
 						{
 							constr.relation = REL_GE;
@@ -167,39 +185,174 @@ void LPParser::read()
 						{
 							constr.relation = REL_EQ;
 						}
-						constr.rhs = parts[i+2];
-						if (parts[i+1] == "-")
-						{
-							constr.rhs *= -1;
-						}
-						constraint_finished = true;
-						break;
+
+						// Initialize righthand side
+						constr.rhs = 1;
+
+						// Tell the rest of the loop that we're on the rhs now
+						constraint_rhs = true;
 					}
-					// Parse variable/coefficient pairs and write them into objective.elements
-					parse_varcoeff(parts[i], constr.elements);
+					// We're on the righthand side now
+					else if (constraint_rhs)
+					{
+						// In case righthand side starts with a minus, set the coefficient
+						if (parts[i] == "-")
+						{
+							constr.rhs = -1;
+						}
+						// Here we finally have the value of the RHS
+						else
+						{
+							constr.rhs *= (mpq_class)parts[i];
+							constraint_rhs = false;
+							constraint_finished = true;
+						}
+					}
+					// Here we're still on the lefthand side
+					else
+					{
+						// Parse variable/coefficient pairs from lefthand side and write them into objective.elements
+						parse_varcoeff(parts[i], constr.elements);
+					}
 				}
 				// Update current constraint
-				constraints[cur_constraint] = constr;
-				// Set cur_constraint = -1 if a constraint has been finished, so that a new one is generated in the next step
+				constraints[constraint_cur] = constr;
+				// Set constraint_cur = -1 if a constraint has been finished, so that a new one is generated in the next step
 				if (constraint_finished) {
-					cur_constraint = -1;
+					constraint_cur = -1;
 				}
 				break;
 
 			case SEC_BOUNDS:
-				parts = split_expression(line);
+				parts = split_expression(line, "<>=");
 				trim(parts);
 				ldbg.vec(parts, "Parts of the line");
+				int bound_cur = -1;
+				string lower("");
+				string upper("");
+				int btype = 0;
+
+				// Determine variable name
+				// Bound given in 0 < x < 20 form
+				if (parts.size() == 5)
+				{
+					name = parts[2];
+					btype = 1;
+				}
+				// Bound given in 20 < x form, i.e. parts[0] is numeric
+				if (parts.size() == 3 && parts[0].find_first_of("0123456789.") == 0)
+				{
+					name = parts[2];
+					btype = 2;
+				}
+				// Bound given in x < 20, i.e. parts[2] is numeric
+				else if (parts.size() == 3)
+				{
+					name = parts[0];
+					btype = 3;
+					ldbg << "Bound form x < 20" << name << "\n";
+				}
+				// Free variable: x FREE (transformed to xfree)
+				if (parts.size() == 1)
+				{
+					// Variable name is just the string truncated by 4 chars ("free")
+					name = parts[0].substr(0, parts[0].size()-4);
+					btype = 4;
+				}
+
+				// Check if the bound has already been set
+				for (unsigned i = 0; i < bounds.size(); i++)
+				{
+					if (bounds[i].name == name)
+					{
+						bound_cur = i;
+						break;
+					}
+				}
+				if (bound_cur == -1)
+				{
+					LPBound bound;
+					bounds.push_back(bound);
+					bound_cur = bounds.size()-1;
+				}
+				bounds[bound_cur].name = name;
+				
+				switch(btype)
+				{
+					// 0 < x < 20 form
+					case 1:
+						if (parts[0].find("inf") != string::npos)
+						{
+							bounds[bound_cur].lower = 0;
+							bounds[bound_cur].lower_unbound = true;
+						}
+						else
+						{
+							bounds[bound_cur].lower = parts[0];
+							bounds[bound_cur].lower_unbound = false;
+						}
+						if (parts[4].find("inf") != string::npos)
+						{
+							bounds[bound_cur].upper = 0;
+							bounds[bound_cur].upper_unbound = true;
+						}
+						else
+						{
+							bounds[bound_cur].upper = parts[4];
+							bounds[bound_cur].upper_unbound = false;
+						}
+						break;
+
+					// 20 < x
+					case 2:
+						if (parts[0].find("inf") != string::npos)
+						{
+							bounds[bound_cur].lower = 0;
+							bounds[bound_cur].lower_unbound = true;
+						}
+						else
+						{
+							bounds[bound_cur].lower = parts[0];
+							bounds[bound_cur].lower_unbound = false;
+						}
+						break;
+
+					// x < 20
+					case 3:
+						if (parts[2].find("inf") != string::npos)
+						{
+							bounds[bound_cur].upper = 0;
+							bounds[bound_cur].upper_unbound = true;
+						}
+						else
+						{
+							bounds[bound_cur].upper = parts[2];
+							bounds[bound_cur].upper_unbound = false;
+						}
+						break;
+
+					case 4:
+						bounds[bound_cur].upper = 0;
+						bounds[bound_cur].upper_unbound = true;
+						bounds[bound_cur].lower = 0;
+						bounds[bound_cur].lower_unbound = true;
+						break;
+				}
+				
 				break;
 		}
 	}
-	exit(0);
 	linf << "Objective:\n";
 	objective.dump();
 	linf << "Constraints:\n";
 	for (unsigned i = 0; i < constraints.size(); i++)
 	{
 		constraints[i].dump();
+	}
+	linf << "Bounds:\n";
+	for (unsigned i = 0; i < bounds.size(); i++)
+	{
+		bounds[i].dump();
 	}
 }
 
@@ -258,9 +411,8 @@ void LPParser::trim(vector<string>& lines) {
 	}
 }
 
-vector<string> LPParser::split_expression(const string& strbase)
+vector<string> LPParser::split_expression(const string& strbase, const string& delimiters)
 {
-	const string delimiters = "+-";
 	const string relsyms = "<>=";
 
 	vector<string> tokens;
@@ -273,8 +425,10 @@ vector<string> LPParser::split_expression(const string& strbase)
 	{
 		str.erase( remove( str.begin(), str.end(), '=' ), str.end() );
 	}
-	ldbg << "splitting string: " << str << "\n";
 
+	ldbg << "Splitting string: " << str << "\n";
+
+	// Tokens are assembled character by character
 	string token("");
 
 	for(unsigned i = 0; i < str.size(); i++)
@@ -295,154 +449,11 @@ vector<string> LPParser::split_expression(const string& strbase)
 		{
 			token += str.substr(i, 1);
 		}
-		if (i == str.size()-1)
+		// If line ends with a variable or coefficient, add that to the tokens
+		if (i == str.size()-1 && token.size() > 0)
 		{
 			tokens.push_back(token);
 		}
-	}
-	return tokens;
-
-	// If the string doesn't start with a delimiter or a relation symbol,
-	// it must start with a coefficient prepend a +
-	if (str.find_first_of(delimiters) != 0 && str.find_first_of(relsyms) != 0)
-	{
-		str = "+" + str;
-	}
-
-
-
-	// First delimiter
-	string::size_type cur	  = str.find_first_of(delimiters);
-	// Next delimiter
-	string::size_type next	  = str.find_first_of(delimiters, cur+1);
-	// First non-delimiting char
-	string::size_type tokenend = str.find_last_not_of(delimiters, next);
-
-	bool finished = false;
-	bool lastround = false;
-	while (!finished)
-	{
-		ldbg << "cur " << cur << " next " << next << " last " << tokenend << "\n";
-		// Extract token (including delimiter)
-		string token = str.substr(cur, tokenend - cur + 1);
-		// Get the sign (i.e. the 1-character delimiter)
-		string sign  = token.substr(0, 1);
-		// Store sign
-		tokens.push_back(sign);
-		// Now strip the delimiter
-		token = token.substr(1);
-		ldbg << "token: " << token << "\n";
-		// Check if remaining token contains relation symbols
-		string::size_type rel = token.find_first_of(relsyms);
-		// Found a token with relation symbol, add it to the vector.
-		if (string::npos != rel)
-		{
-			ldbg << "Relation symbol in token: " << rel << "\n";
-			string relation = token.substr(rel, 1);
-			token = token.substr(0, rel);
-			ldbg << "token: " << token << "\n";
-			ldbg << "rel: " << relation << "\n";
-			tokens.push_back(token);
-			tokens.push_back(relation);
-		}
-		else
-		{
-			// Found a token without relation symbol, add it to the vector.
-			tokens.push_back(token);
-		}
-		ldbg << "token " << token << "\n";
-		// First delimiter
-		cur	 = str.find_first_of(delimiters, next);
-		// Next delimiter
-		next = str.find_first_of(delimiters, cur+1);
-		// First non-delimiting char
-		tokenend = str.find_last_not_of(delimiters, next);
-		ldbg << "cur " << cur << " next " << next << " last " << tokenend << "\n";
-
-		if (lastround)
-		{
-			finished = true;
-		}
-	}
-
-	return tokens;
-
-	// First delimiter
-	string::size_type pos	  = str.find_first_of(delimiters);
-	// First non-delimiting char
-	string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-
-	while (string::npos != pos || string::npos != lastPos)
-	{
-		string token = str.substr(lastPos, pos - lastPos);
-		ldbg << "found token: " << token << "\n";
-		string::size_type rel = token.find_first_of(relsyms);
-		// Found a token with relation symbol, add it to the vector.
-		if (string::npos != rel)
-		{
-			ldbg << "Relation symbol in token: " << rel << "\n";
-			string op = token.substr(rel, 1);
-			// Translate => and >= to >
-			if (op == "=" && token.substr(rel+1, 1) == ">")
-			{
-				op = ">";
-			}
-			// Translate =< and <= to <
-			if (op == "=" && token.substr(rel+1, 1) == "<")
-			{
-				op = "<";
-			}
-			token = token.substr(0, rel);
-			ldbg << "token: " << token << "\n";
-			ldbg << "rel: " << op << "\n";
-			tokens.push_back(token);
-			tokens.push_back(op);
-		}
-		else
-		{
-			// Found a token without relation symbol, add it to the vector.
-			tokens.push_back(token);
-		}
-		// Also add the separator
-		if (string::npos != pos) {
-			string op = str.substr(pos, 1);
-			ldbg << "operator: " << op << "\n";
-			tokens.push_back(op);
-			// 			// Translate => and >= to >
-			// 			if (op == "=" && str.substr(pos+1, 1) == ">")
-			// 			{
-			// 				op = ">";
-			// 			}
-			// 			// Translate =< and <= to <
-			// 			if (op == "=" && str.substr(pos+1, 1) == "<")
-			// 			{
-			// 				op = "<";
-			// 			}
-			// 			tokens.push_back(op);
-			// if (op == "<" || op == ">" || op == "=")
-			// {
-			// 	string::size_type nextOp = str.find_first_of("+-", pos);
-			// 	string::size_type nextVar = str.find_first_not_of("+-><= ", pos);
-			// 	ldbg << "nextOp " << nextOp << "nextVar " << nextVar << "\n";
-			// 	// In case  there is no + or - following the >/</= add a + sign
-			// 	if (nextVar < nextOp)
-			// 	{
-			// 		ldbg << "Added extra +\n";
-			// 		tokens.push_back("+");
-			// 	}
-			// 	else
-			// 	{
-			// 		ldbg << "Next operator is: " << str.substr(nextOp, 1) << "\n";
-			// 		tokens.push_back(str.substr(nextOp, 1));
-			// 		lastPos = nextVar;
-			// 		pos = nextOp;
-			// 	}
-			// }
-		}
-		// Skip delimiters.	 Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
 	}
 	return tokens;
 }
@@ -451,7 +462,14 @@ void LPParser::parse_varcoeff(string str, vector<LPVariable>& elements)
 {
 	LPVariable var;
 	ldbg << "LPParser: Parsing part: " << str << "\n";
-	// Add a new variable
+
+	// Get latest variable
+	if (elements.size() > 0)
+	{
+		var = elements[elements.size()-1];
+	}
+
+	// Add a new variable, if current part is plus or minus
 	if (str == "-" || str == "+")
 	{
 		var.coeff = 1;
@@ -464,14 +482,41 @@ void LPParser::parse_varcoeff(string str, vector<LPVariable>& elements)
 	}
 	// Fill the variable, that has been added in the previous step, with the correct values.
 	// The variable has been added to the end of objective.elements in the step before.
-	var = elements[elements.size()-1];
+
+	// Temporary variable to hold the variable coefficient
+	string varcoeff("");
+	// So find the first non-numeric occurance. This is where the coefficient ends and where the
+	// variable name starts.
 	size_t k = str.find_first_not_of("0123456789.");
-	var.name = trim(str.substr(k));
-	string varcoeff = trim(str.substr(0, k));
+	// If no variable name was given in str, this means coeafficient and variable name
+	// have been separated by a newline in the lp-file and we're just processing the coefficient
+	if (k == string::npos)
+	{
+		varcoeff = trim(str);
+	}
+	// If only the variable name was given but no coefficient, just use this one
+	else if (k == 0)
+	{
+		var.name = trim(str);
+	}
+	// The third case is that the coefficient is followed by the variable name
+	else
+	{
+		varcoeff = trim(str.substr(0, k));
+		var.name = trim(str.substr(k));
+	}
+
 	if (varcoeff.size() > 0)
 	{
 		var.coeff = var.coeff*(mpq_class)atoi(varcoeff.c_str());
 	}
+	if (elements.size() > 0)
+	{
+		elements[elements.size()-1] = var;
+	}
+	else
+	{
+		elements.push_back(var);
+	}
 	ldbg << "LPParser: Generated variable '" << var.name << "' with coefficient '" << var.coeff << "'\n";
-	elements[elements.size()-1] = var;
 }

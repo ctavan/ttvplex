@@ -13,7 +13,7 @@ struct LPVariable
 	string name;
 	mpq_class coeff;
 
-	LPVariable() : name(""), coeff(0) {}
+	LPVariable() : name(""), coeff(1) {}
 
 	void dump()
 	{
@@ -32,7 +32,7 @@ struct LPObjective
 
 	void dump()
 	{
-		linf << "Direction:\t" << direction << "\n";
+		linf << "Direction:\t" << (direction == 1 ? "MAX" : "MIN") << "\n";
 		linf << "Name:\t\t" << name << "\n";
 		linf << "Elements:\n";
 		for (unsigned i = 0; i < elements.size(); i++)
@@ -53,14 +53,32 @@ struct LPConstraint
 
 	void dump()
 	{
-		linf << "Relation:\t" << relation << "\n";
 		linf << "Name:\t\t" << name << "\n";
-		linf << "RHS:\t\t" << rhs << "\n";
 		linf << "Elements:\n";
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
 			elements[i].dump();
 		}
+		linf << "Relation:\t" << (relation == -1 ? "<" : (relation == 1 ? ">" : "=")) << "\n";
+		linf << "RHS:\t\t" << rhs << "\n";
+	}
+};
+
+struct LPBound
+{
+	string name;				//!< Name of the variable
+	mpq_class lower;			//!< Lower bound
+	mpq_class upper;			//!< Upper bound
+	bool lower_unbound;			//!< Whether the variable is unbounded from below
+	bool upper_unbound;			//!< Whether the variable is unbounded from above
+
+	LPBound() : name(""), lower(0), upper(0), lower_unbound(false), upper_unbound(true) {}
+
+	void dump()
+	{
+		linf << "Name:\t\t" << name << "\n";
+		linf << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
+		linf << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
 	}
 };
 
@@ -87,7 +105,9 @@ class LPParser
 		static const int SEC_OBJECTIVE = 2;
 		static const int SEC_CONSTRAINTS = 3;
 		static const int SEC_BOUNDS = 4;
-		static const int SEC_END = 5;
+		static const int SEC_GENERALS = 5;
+		static const int SEC_BINARIES = 6;
+		static const int SEC_END = 7;
 		int section;
 
 		static const int OBJ_MIN = 0;
@@ -99,12 +119,13 @@ class LPParser
 
 		string trim(string line);
 		void trim(vector<string>& lines);
-		vector<string> split_expression(const string& str);
+		vector<string> split_expression(const string& str, const string& delimiters = "+-");
 		void parse_varcoeff(string str, vector<LPVariable>& elements);
 
 	public:
 		LPObjective objective;
 		vector<LPConstraint> constraints;
+		vector<LPBound> bounds;
 
 		LPParser(string filename);
 		~LPParser();
