@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 
+#include <gmpxx.h>
+
 // Class library for numbers
 #include "cln.h"
 

@@ -72,6 +72,7 @@ class Log: public ostream{
 **/
 		void vec(vector< cl_RA > v, string name);
 		void vec(vector< unsigned > v, string name);
+		void vec(vector< string > v, string name);
 /** \brief Dump a 2D-matrix
 	
 	\author Christoph Tavan TU Berlin

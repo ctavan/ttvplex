@@ -39,6 +39,16 @@ void Log::vec(vector< unsigned > v, string name)
 		(ostream&)*this << v[i] << endl;
 	}
 }
+void Log::vec(vector< string > v, string name)
+{
+	if (level < 1) {
+		return;
+	}
+	(ostream&)*this << "Dumping " << v.size() << "-vector " << name << ":" << endl;
+	for (unsigned i = 0; i < v.size(); i++) {
+		(ostream&)*this << v[i] << endl;
+	}
+}
 
 void Log::matrix(vector< vector< cl_RA > > m, string name)
 {

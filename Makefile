@@ -5,7 +5,7 @@ CLN_INC = /opt/local/include/
 # Location of compiled CLN library
 CLN_LIB = /opt/local/lib/libcln.a
 # Location of the compiled GMP library which is required by CLN
-GMP_LIB = /opt/local/lib/libgmp.a
+GMP_LIB = /opt/local/lib/libgmp.a /opt/local/lib/libgmpxx.a
 
 # Include paths that should be searched
 INCLUDE = -I$(CLN_INC) -I./
