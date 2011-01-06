@@ -40,7 +40,7 @@ void LPParser::read()
 
 		// Clean the input line
 		ldbg << "LPParser: Parsing line: " << line << "\n";
-		line = trim(line);
+		line = trim(line, false);
 		ldbg << "LPParser: Cleaned line: " << line << "\n";
 
 		// Ignore empty lines
@@ -57,7 +57,7 @@ void LPParser::read()
 			linf << "LPParser: Entering section OBJECTIVE\n";
 			section = SEC_OBJECTIVE;
 			// Set direction of the objective
-			objective.direction = OBJ_MAX;
+			objective.direction = LPObjective::OBJ_MAX;
 			continue;
 		}
 		if (   line.find("minimize") != string::npos
@@ -66,7 +66,7 @@ void LPParser::read()
 			linf << "LPParser: Entering section OBJECTIVE\n";
 			section = SEC_OBJECTIVE;
 			// Set direction of the objective
-			objective.direction = OBJ_MIN;
+			objective.direction = LPObjective::OBJ_MIN;
 			continue;
 		}
 		if (   line.find("subject to") != string::npos
@@ -110,16 +110,19 @@ void LPParser::read()
 			continue;
 		}
 
+		// Now also remove all remaining whitespaces
+		line = trim(line);
+		ldbg << "LPParser: Entirely cleaned line: " << line << "\n";
+
 		// Check if there we're in a named line (i.e. colon is present)
 		string name("");
 		size_t k;
 		if ((k = line.find(":")) != string::npos)
 		{
-			name = trim(line.substr(0,k));
+			name = line.substr(0,k);
 			ldbg << "LPParser: Colon found at position " << k << " => Named line with name: " << name << "\n";
-			line = trim(line.substr(k+1));
+			line = line.substr(k+1);
 		}
-		line.erase( remove( line.begin(), line.end(), ' ' ), line.end() );
 		ldbg << "LPParser: Remaining line without name: " << line << "\n";
 
 		// Parse the rest
@@ -175,15 +178,15 @@ void LPParser::read()
 						// Set relation
 						if (parts[i] == ">")
 						{
-							constr.relation = REL_GE;
+							constr.relation = LPConstraint::REL_GE;
 						}
 						if (parts[i] == "<")
 						{
-							constr.relation = REL_LE;
+							constr.relation = LPConstraint::REL_LE;
 						}
 						if (parts[i] == "=")
 						{
-							constr.relation = REL_EQ;
+							constr.relation = LPConstraint::REL_EQ;
 						}
 
 						// Initialize righthand side
@@ -250,7 +253,6 @@ void LPParser::read()
 				{
 					name = parts[0];
 					btype = 3;
-					ldbg << "Bound form x < 20" << name << "\n";
 				}
 				// Free variable: x FREE (transformed to xfree)
 				if (parts.size() == 1)
@@ -356,15 +358,15 @@ void LPParser::read()
 	}
 }
 
-string LPParser::trim(string line)
+string LPParser::trim(string line, const bool& strip_spaces)
 {
-	// If line is empty, nothing has to be cleande
+	// If line is empty, nothing has to be cleaned
 	if (line.size() == 0) {
 		return line;
 	}
 
-	// Sime size variables
-	size_t n, k;
+	// Size variable
+	size_t n;
 
 	// Strip comments
 	n = line.find_first_of("\\");
@@ -389,6 +391,7 @@ string LPParser::trim(string line)
 	}
 	// remove leading and trailing spaces in line
 	// n is location of first letter, k is location of last
+	size_t k;
 	n = line.find_first_not_of(" ");
 	k = line.find_last_not_of(" ");
 	line = line.substr(n, k-n+1); //keep n-k+1 chars
@@ -400,6 +403,12 @@ string LPParser::trim(string line)
 	while((k = line.find("  ")) != string::npos)
 	{
 		line.erase(k, 1);
+	}
+
+	// Remove all spaces
+	if (strip_spaces)
+	{
+		line.erase(remove(line.begin(), line.end(), ' '), line.end());
 	}
 
 	return line;
@@ -426,7 +435,7 @@ vector<string> LPParser::split_expression(const string& strbase, const string& d
 		str.erase( remove( str.begin(), str.end(), '=' ), str.end() );
 	}
 
-	ldbg << "Splitting string: " << str << "\n";
+	ldbg << "LPParser: Splitting string: " << str << "\n";
 
 	// Tokens are assembled character by character
 	string token("");
@@ -437,11 +446,11 @@ vector<string> LPParser::split_expression(const string& strbase, const string& d
 		{
 			if (i > 0 && token.size() > 0)
 			{
-				ldbg << "=> token finished: " << token << "\n";
+				ldbg << "LPParser: => token finished: " << token << "\n";
 				tokens.push_back(token);
 				token = "";
 			}
-			ldbg << "=> relation symbol/operator added: " << str.substr(i, 1) << "\n";
+			ldbg << "LPParser: => relation symbol/operator added: " << str.substr(i, 1) << "\n";
 			tokens.push_back(str.substr(i, 1));
 		}
 		if (   str.substr(i, 1).find_first_not_of(delimiters) != string::npos 
