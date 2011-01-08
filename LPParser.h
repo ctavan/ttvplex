@@ -217,6 +217,75 @@ struct LPBound
 	}
 };
 
+/** \brief  Class holding a list of variables
+	
+	Holds a list of all variable-names in the problem. Has convenience methods for
+	accessing the variablenames.
+	
+© Copyright 2011 TU Berlin - Christoph Tavan. All Rights Reserved.
+
+	\author Christoph Tavan TU Berlin
+	\author $LastChangedBy$
+	\date 2011-01-08
+	\date $LastChangedDate$
+	\version $Rev$	\sa
+**/
+struct LPVarlist
+{
+	vector<string> elements;	//!< Vector of variable names
+/** \brief Adds a variable named by name to the list only if it is not yet in the list
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\param string& Variable to be added to the list
+	\return Index of the variable
+	\sa
+**/
+	int add(const string& name)
+	{
+		int i;
+		if ((i = indexOf(name)) < 0)
+		{
+			elements.push_back(name);
+			i = elements.size()-1;
+		}
+		return i;
+	}
+/** \brief Returns the index of the variable named by the first argument
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\param string& Variable name to check for
+	\return index of the variable or -1 if the variable doesnt exist
+	\sa
+**/
+	int indexOf(const string& name)
+	{
+		for (unsigned i = 0; i < elements.size(); i++)
+		{
+			if (elements[i] == name)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+/** \brief Convenience method to dump an object of type LPVarlist
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-06
+	\return void
+	\sa
+**/
+	void dump()
+	{
+		for (unsigned i = 0; i < elements.size(); i++)
+		{
+			linf << elements[i] << "\n";
+		}
+	}
+};
+
 /** \brief  Class for parsing LP-Files
 	
 	Reads LP-files, converts the LP to standard form and returns the arrays that are
@@ -323,7 +392,7 @@ class LPParser
 		LPObjective objective;				//!< The objective
 		vector<LPConstraint> constraints;	//!< The constraints
 		vector<LPBound> bounds;				//!< The bounds
-		vector<string> variables;			//!< List of all variable-names in the LP
+		LPVarlist variables;				//!< List of all variable-names in the LP
 
 /** \brief Constructor
 	
@@ -357,6 +426,17 @@ class LPParser
 	\sa
 **/
 		void read();
+/** \brief Collect variables of the LP
+	
+	Goes through objective, constraings and bounds and generates a list of all
+	variable names that have been defined in the LP-file.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\return void
+	\sa
+**/
+		void collect_variables();
 };
 
 #endif

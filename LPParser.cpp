@@ -356,6 +356,34 @@ void LPParser::read()
 	{
 		bounds[i].dump();
 	}
+
+	// Finally collect all variables of the system
+	collect_variables();
+}
+
+void LPParser::collect_variables()
+{
+	ldbg << "LPParser: collecting variables...\n";
+	ldbg << "LPParser:   ... from objective\n";
+	for (unsigned j = 0; j < objective.elements.size(); j++)
+	{
+		variables.add(objective.elements[j].name);
+	}
+	ldbg << "LPParser:   ... from constraints\n";
+	for (unsigned i = 0; i < constraints.size(); i++)
+	{
+		for (unsigned j = 0; j < constraints[i].elements.size(); j++)
+		{
+			variables.add(constraints[i].elements[j].name);
+		}
+	}
+	ldbg << "LPParser:   ... from bounds\n";
+	for (unsigned i = 0; i < bounds.size(); i++)
+	{
+		variables.add(bounds[i].name);
+	}
+	linf << "LPParser: Variables in the system:\n";
+	variables.dump();
 }
 
 string LPParser::trim(string line, const bool& strip_spaces)
