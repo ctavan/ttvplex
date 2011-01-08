@@ -51,8 +51,8 @@ void LPParser::read()
 		}
 
 		// Evaluate the occurance of keywords that start a new section
-		if (   line.find("maximize") != string::npos
-			|| line.find("max") != string::npos )
+		if (   line.find("maximize") == 0
+			|| line.find("max") == 0 )
 		{
 			linf << "LPParser: Entering section OBJECTIVE\n";
 			section = SEC_OBJECTIVE;
@@ -60,8 +60,8 @@ void LPParser::read()
 			objective.direction = LPObjective::OBJ_MAX;
 			continue;
 		}
-		if (   line.find("minimize") != string::npos
-			|| line.find("min") != string::npos )
+		if (   line.find("minimize") == 0
+			|| line.find("min") == 0 )
 		{
 			linf << "LPParser: Entering section OBJECTIVE\n";
 			section = SEC_OBJECTIVE;
@@ -69,41 +69,41 @@ void LPParser::read()
 			objective.direction = LPObjective::OBJ_MIN;
 			continue;
 		}
-		if (   line.find("subject to") != string::npos
-			|| line.find("such that") != string::npos
-			|| line.find("s.t.") != string::npos
-			|| line.find("st.") != string::npos
-			|| line.find("st") != string::npos )
+		if (   line.find("subject to") == 0
+			|| line.find("such that") == 0
+			|| line.find("s.t.") == 0
+			|| line.find("st.") == 0
+			|| line.find("st") == 0 )
 		{
 			// Now enter CONSTRAINT section
 			linf << "LPParser: Entering section CONSTRAINTS\n";
 			section = SEC_CONSTRAINTS;
 			continue;
 		}
-		if (   line.find("bounds") != string::npos
-		 	|| line.find("bound") != string::npos )
+		if (   line.find("bounds") == 0
+		 	|| line.find("bound") == 0 )
 		{
 			linf << "LPParser: Entering section BOUNDS\n";
 			section = SEC_BOUNDS;
 			continue;
 		}
-		if (   line.find("generals") != string::npos
-		 	|| line.find("general") != string::npos
-		 	|| line.find("gen") != string::npos )
+		if (   line.find("generals") == 0
+		 	|| line.find("general") == 0
+		 	|| line.find("gen") == 0 )
 		{
 			linf << "LPParser: Entering section GENERALS\n";
 			section = SEC_GENERALS;
 			continue;
 		}
-		if (   line.find("binaries") != string::npos
-		 	|| line.find("binary") != string::npos
-		 	|| line.find("bin") != string::npos )
+		if (   line.find("binaries") == 0
+		 	|| line.find("binary") == 0
+		 	|| line.find("bin") == 0 )
 		{
 			linf << "LPParser: Entering section BINARIES\n";
 			section = SEC_BINARIES;
 			continue;
 		}
-		if (   line.find("end") != string::npos )
+		if (   line.find("end") == 0 )
 		{
 			linf << "LPParser: Entering section END\n";
 			section = SEC_END;
