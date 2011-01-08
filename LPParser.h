@@ -233,6 +233,21 @@ struct LPBound
 struct LPVarlist
 {
 	vector<string> elements;	//!< Vector of variable names
+	int ns;						//!< Number of slack and surplus variables
+	string s_prefix;			//!< String prefix of slack and surplus variables
+/** \brief Constructor
+	
+	Member Variables are initialized as follows:
+		ns = 0
+		s_prefix = s
+	meaning that all variables are positive integers but not bound from above.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-06
+	\return void
+	\sa
+**/
+	LPVarlist() : ns(0), s_prefix("s") {}
 /** \brief Adds a variable named by name to the list only if it is not yet in the list
 	
 	\author Christoph Tavan TU Berlin
@@ -259,16 +274,39 @@ struct LPVarlist
 	\return index of the variable or -1 if the variable doesnt exist
 	\sa
 **/
-	int indexOf(const string& name)
+	int indexOf(const string& name, const bool& containing = false)
 	{
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
-			if (elements[i] == name)
+			if (   (!containing && elements[i] == name)
+				|| (containing && elements[i].find(name) != string::npos))
 			{
 				return i;
 			}
 		}
 		return -1;
+	}
+	string addSlackSurplus()
+	{
+		// First determine the slack/surplus-variable prefix (must be unique)
+		if (ns < 1)
+		{
+			ldbg << "Determining unique slack variable prefix.";
+			// Append '_' to the s_prefix, until it is assured, that unique slack/surplus-variable-names will be generated
+			while (indexOf(s_prefix, true) >= 0)
+			{
+				ldbg << "Is there a variable containing the slack/surplus-prefix '" << s_prefix << "'?" << indexOf(s_prefix, true) << "\n";
+				s_prefix += "_";
+			}
+			ldbg << "Found unique slack/surplus-prefix '" << s_prefix << "'\n";
+		}
+		string name;
+		stringstream out;
+		out << ns++;
+		name = s_prefix + out.str();
+		elements.push_back(name);
+		ldbg << "Adding slack/surplus-variable: '" << name << "', now having " << ns << " slack/surplus variable(s) in the system.\n";
+		return name;
 	}
 /** \brief Convenience method to dump an object of type LPVarlist
 	
@@ -437,6 +475,18 @@ class LPParser
 	\sa
 **/
 		void collect_variables();
+/** \brief Bring the LP to standard form
+	
+	 * Adds slack- and surplus-variables for inequalities
+	 * Adds x+ and x- variables for unbounded variables
+	 * Multiplies negative righthandsides by -1
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\return void
+	\sa
+**/
+		void standardize();
 };
 
 #endif

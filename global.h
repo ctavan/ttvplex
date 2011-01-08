@@ -4,6 +4,7 @@
 // C Standard libraries
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 

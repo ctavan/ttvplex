@@ -67,6 +67,8 @@ int main(int argc, char** argv)
 
 	LPParser lp(input);
 	lp.read();
+	lp.standardize();
+	lp.variables.dump();
 
 	exit(EXIT_SUCCESS);
 

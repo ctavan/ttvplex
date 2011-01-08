@@ -386,6 +386,32 @@ void LPParser::collect_variables()
 	variables.dump();
 }
 
+void LPParser::standardize()
+{
+	linf << "LPParser: Bringing the LP to standard form\n";
+	for (unsigned i = 0; i < constraints.size(); i++)
+	{
+		// Nothing to be done, if constraint is an equals relation
+		if (constraints[i].relation == LPConstraint::REL_EQ)
+		{
+			continue;
+		}
+		// Get a unique name for the slack/surplus variable
+		string name = variables.addSlackSurplus();
+		// Create a new variable and add it to the constraint
+		LPVariable slacksurplus;
+		slacksurplus.name = name;
+		// Set coefficient to -1 for surplus variables
+		if (constraints[i].relation == LPConstraint::REL_GE)
+		{
+			slacksurplus.coeff = -1;
+		}
+		constraints[i].elements.push_back(slacksurplus);
+		// Since we've now added slack/surplus variable, we get an equal-constraint!
+		constraints[i].relation = LPConstraint::REL_EQ;
+	}
+}
+
 string LPParser::trim(string line, const bool& strip_spaces)
 {
 	// If line is empty, nothing has to be cleaned
