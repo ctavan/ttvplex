@@ -389,8 +389,95 @@ void LPParser::collect_variables()
 void LPParser::standardize()
 {
 	linf << "LPParser: Bringing the LP to standard form\n";
+	boundconstraints();
 	slacksurplus();
-	unbounded();
+
+	linf << "===================================================\n";
+	linf << "LP now in standard form\n";
+	linf << "Objective:\n";
+	objective.dump();
+	linf << "Constraints:\n";
+	for (unsigned i = 0; i < constraints.size(); i++)
+	{
+		constraints[i].dump();
+	}
+	linf << "Bounds:\n";
+	for (unsigned i = 0; i < bounds.size(); i++)
+	{
+		bounds[i].dump();
+	}
+	variables.dump();
+}
+
+void LPParser::boundconstraints()
+{
+	ldbg << "LPParser: Checking negative and unbound variables\n";
+	for (unsigned i = 0; i < bounds.size(); i++)
+	{
+		// We don't have to do anything, if the lower bound is 0 and there is no upper bound.
+		if (!bounds[i].lower_unbound && bounds[i].lower == 0 && bounds[i].upper_unbound)
+		{
+			continue;
+		}
+		// Variable x bounded from. Since it has a finite upper bound -> Add constraint of form x < 20
+		if (!bounds[i].lower_unbound && !bounds[i].upper_unbound)
+		{
+			LPConstraint constr;
+			constr.name = "UpperBound_"+bounds[i].name;
+			constr.relation = LPConstraint::REL_LE;
+			constr.rhs = bounds[i].upper;
+			LPVariable var;
+			var.name = bounds[i].name;
+			var.coeff = 1;
+			constr.elements.push_back(var);
+			constraints.push_back(constr);
+		}
+		// Variable is not unbounded from below, but has a nonzero lower bound
+		if (!bounds[i].lower_unbound && bounds[i].lower != 0)
+		{
+			mpq_class lower = bounds[i].lower;
+			string oldname = bounds[i].name;
+			string newname = variables.replaceBounded(bounds[i].name);
+			ldbg << "Variable '" << oldname << "' has nonzero lower bound: " << lower << "\n";
+			ldbg << "Adding new variable " << newname << " = " << oldname << " + " << -1*lower << "\n";
+
+			// Replace variable in the objective, and account for the offset
+			for (unsigned j = 0; j < objective.elements.size(); j++)
+			{
+				if (objective.elements[j].name != oldname)
+				{
+					continue;
+				}
+				ldbg << "Oldcoeff " << objective.elements[j].coeff << " bounds lower" << "\n";
+				objective.elements[j].name = newname;
+				objective.offset += objective.elements[j].coeff*lower;
+			}
+
+			// Replace variable in the constraints
+			for (unsigned j = 0; j < constraints.size(); j++)
+			{
+				for (unsigned k = 0; k < constraints[j].elements.size(); k++)
+				{
+					if (constraints[j].elements[k].name != oldname)
+					{
+						continue;
+					}
+					ldbg << "Found variable " << oldname << " in this objective, adjusting rhs.\n";
+					// b_x = x - lower => x = b_x + lower
+					constraints[j].dump();
+					constraints[j].elements[k].name = newname;
+					constraints[j].rhs -= constraints[j].elements[k].coeff*lower;
+					constraints[j].dump();
+				}
+			}
+		}
+		// Variable is free
+		if (bounds[i].lower_unbound && bounds[i].upper_unbound)
+		{
+			ldbg << "Variable " << bounds[i].name << " is unbounded.\n";
+			exit(0);
+		}
+	}
 }
 
 void LPParser::slacksurplus()
@@ -417,11 +504,6 @@ void LPParser::slacksurplus()
 		// Since we've now added slack/surplus variable, we get an equal-constraint!
 		constraints[i].relation = LPConstraint::REL_EQ;
 	}
-}
-
-void LPParser::unbounded()
-{
-	
 }
 
 string LPParser::trim(string line, const bool& strip_spaces)

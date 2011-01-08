@@ -67,6 +67,7 @@ struct LPObjective
 	int direction;					//!< Whether to maximize or minimize the objective. Default: MINIMIZE
 	string name;					//!< Optional name of the Objective. Default: "obj"
 	vector<LPVariable> elements;	//!< Coefficient-variable pairs of the objective.
+	mpq_class offset;				//!< Offset to the objective that may come from substituting variables with nonzero lower bound
 
 	static const int OBJ_MIN = 0;	//!< Constant designating MINIMIZE
 	static const int OBJ_MAX = 1;	//!< Constant designating MAXIMIZE
@@ -81,7 +82,7 @@ struct LPObjective
 	\return void
 	\sa
 **/
-	LPObjective() : direction(OBJ_MIN), name("obj") {}
+	LPObjective() : direction(OBJ_MIN), name("obj"), offset(0) {}
 /** \brief Convenience method to dump an object of type LPObjective
 	
 	\author Christoph Tavan TU Berlin
@@ -93,6 +94,7 @@ struct LPObjective
 	{
 		linf << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
 		linf << "Name:\t\t" << name << "\n";
+		linf << "Offset:\t\t" << offset << "\n";
 		linf << "Elements:\n";
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
@@ -235,6 +237,8 @@ struct LPVarlist
 	vector<string> elements;	//!< Vector of variable names
 	int ns;						//!< Number of slack and surplus variables
 	string s_prefix;			//!< String prefix of slack and surplus variables
+	int nbound;					//!< Number of variables that have been introduced for nonzero lower bounds
+	string bound_prefix;		//!< Suffix variables that have nonzero lower bound are replaced with
 /** \brief Constructor
 	
 	Member Variables are initialized as follows:
@@ -247,7 +251,7 @@ struct LPVarlist
 	\return void
 	\sa
 **/
-	LPVarlist() : ns(0), s_prefix("s") {}
+	LPVarlist() : ns(0), s_prefix("s_"), nbound(0), bound_prefix("b_") {}
 /** \brief Adds a variable named by name to the list only if it is not yet in the list
 	
 	\author Christoph Tavan TU Berlin
@@ -286,6 +290,13 @@ struct LPVarlist
 		}
 		return -1;
 	}
+/** \brief Determines a unique slack/surplus variable name and adds it to the variable list
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\return Name of the slack/surplus variable
+	\sa
+**/
 	string addSlackSurplus()
 	{
 		// First determine the slack/surplus-variable prefix (must be unique)
@@ -307,6 +318,25 @@ struct LPVarlist
 		elements.push_back(name);
 		ldbg << "Adding slack/surplus-variable: '" << name << "', now having " << ns << " slack/surplus variable(s) in the system.\n";
 		return name;
+	}
+	string replaceBounded(const string& name)
+	{
+		// First determine the slack/surplus-variable prefix (must be unique)
+		if (nbound < 1)
+		{
+			ldbg << "Determining unique bound variable prefix.\n";
+			// Append '_' to the s_prefix, until it is assured, that unique slack/surplus-variable-names will be generated
+			while (indexOf(bound_prefix, true) >= 0)
+			{
+				ldbg << "Is there a variable containing the slack/surplus-prefix '" << bound_prefix << "'?" << indexOf(bound_prefix, true) << "\n";
+				bound_prefix += "_";
+			}
+			ldbg << "Found unique bound-prefix '" << bound_prefix << "'\n";
+		}
+		nbound++;
+		int i = indexOf(name);
+		elements[i] = bound_prefix + name;
+		return elements[i];
 	}
 /** \brief Convenience method to dump an object of type LPVarlist
 	
@@ -487,6 +517,18 @@ class LPParser
 	\sa
 **/
 		void standardize();
+/** \brief Create constraints out of bounds
+	
+	Replaces unbounded variables by x+ and x- variables. Updates
+	the objective and the constraints accordingly. Adds constraints
+	for all bounds.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\return void
+	\sa
+**/
+		void boundconstraints();
 /** \brief Add slack and surplus variables
 	
 	Adds slack- and surplus-variables for inequalities such that all
@@ -498,17 +540,6 @@ class LPParser
 	\sa
 **/
 		void slacksurplus();
-/** \brief Replace unbounded variables
-	
-	Replaces unbounded variables by x+ and x- variables. Updates
-	the objective and the constraints accordingly.
-	
-	\author Christoph Tavan TU Berlin
-	\date 2011-01-08
-	\return void
-	\sa
-**/
-		void unbounded();
 };
 
 #endif

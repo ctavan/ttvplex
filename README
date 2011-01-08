@@ -1,1 +1,7 @@
 Revised Simplex implementation
+
+
+NOTES
+=====
+
+ * There might be problems, if the upper bound of a variable is negative...

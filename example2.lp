@@ -7,7 +7,8 @@ Subject To
  c3: x2 - 3.5 x4 = 0
 Bounds
  0 <= x1 <= 4
- 2 <= x4 <= 3
+ -2 <= x4 <= 3
+x2 Free
 General
  x4
 End
