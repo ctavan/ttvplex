@@ -487,6 +487,28 @@ class LPParser
 	\sa
 **/
 		void standardize();
+/** \brief Add slack and surplus variables
+	
+	Adds slack- and surplus-variables for inequalities such that all
+	constraints become equal-constraints.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\return void
+	\sa
+**/
+		void slacksurplus();
+/** \brief Replace unbounded variables
+	
+	Replaces unbounded variables by x+ and x- variables. Updates
+	the objective and the constraints accordingly.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\return void
+	\sa
+**/
+		void unbounded();
 };
 
 #endif
