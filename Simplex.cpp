@@ -60,164 +60,194 @@ void Simplex::init(LPParser& lp)
 	}
 	ldbg.vec(c, "c");
 
-	exit(0);
+	ldbg << "Setting up CARRY-Matrix.\n";
+	CARRY.clear();
+	// First line of carry-matrix: reduced costs
+	CARRY.push_back(vector<mpq_class>());
+	CARRY[0].push_back(0);
 	// Index set for basis columns
 	basis.clear();
-	basis.push_back(1);
-	basis.push_back(2);
-	basis.push_back(3);
-
-	// Righthand side
-	b.clear();
-	b.push_back(1);
-	b.push_back(3);
-	b.push_back(4);
-	ldbg.vec(b, "b");
-
-	// Matrix A
-	A.clear();
-	A.push_back(vector<mpq_class>());
-	A.push_back(vector<mpq_class>());
-	A.push_back(vector<mpq_class>());
-	A[0].push_back(3);
-	A[0].push_back(2);
-	A[0].push_back(1);
-	A[0].push_back(0);
-	A[0].push_back(0);
-
-	A[1].push_back(5);
-	A[1].push_back(1);
-	A[1].push_back(1);
-	A[1].push_back(1);
-	A[1].push_back(0);
-
-	A[2].push_back(2);
-	A[2].push_back(5);
-	A[2].push_back(1);
-	A[2].push_back(0);
-	A[2].push_back(1);
-	ldbg.matrix(A, "A");
-
-	// Cost coefficients c
-	c.clear();
-	c.push_back(1);
-	c.push_back(1);
-	c.push_back(1);
-	c.push_back(1);
-	c.push_back(1);
-	ldbg.vec(c, "c");
-
-
-	// Carry Matrix
-	CARRY.clear();
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-
-	int i = 0;
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-
-	i++;
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-
-	i++;
-	CARRY[i].push_back(b[0]);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(3);
-	CARRY[i].push_back(2);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-
-	i++;
-	CARRY[i].push_back(b[1]);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(5);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-
-	i++;
-	CARRY[i].push_back(b[2]);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(2);
-	CARRY[i].push_back(5);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
+	for (unsigned i = 0; i < b.size(); i++)
+	{
+		CARRY[0][0] -= b[i];
+		CARRY[0].push_back(0);
+		basis.push_back(i+1);
+	}
+	for (unsigned i = 1; i <= b.size(); i++)
+	{
+		CARRY.push_back(vector<mpq_class>());
+		CARRY[i].push_back(b[i-1]);
+		for (unsigned j = 1; j <= b.size(); j++)
+		{
+			if (i == j)
+			{
+				CARRY[i].push_back(1);
+			}
+			else
+			{
+				CARRY[i].push_back(0);
+			}
+		}
+	}
 	ldbg.matrix(CARRY, "CARRY");
 
-	Matrix::rowSubtract(CARRY, 1, 2);
-	Matrix::rowSubtract(CARRY, 1, 3);
-	Matrix::rowSubtract(CARRY, 1, 4);
-	ldbg.matrix(CARRY, "CARRY");
-	Matrix::pivot(CARRY, CARRY, 2, 4);
-	ldbg.matrix(CARRY, "CARRY");
-	Matrix::pivot(CARRY, CARRY, 2, 5);
-	ldbg.matrix(CARRY, "CARRY");
-	Matrix::pivot(CARRY, CARRY, 3, 7);
-	ldbg.matrix(CARRY, "CARRY");
-	Matrix::pivot(CARRY, CARRY, 4, 8);
-	ldbg.matrix(CARRY, "CARRY");
-	ldbg.message("=================");
-
-	// Carry-Matrix
-	CARRY.clear();
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-	CARRY.push_back(vector<mpq_class>());
-
-	i = 0;
-	CARRY[i].push_back(-b[0]-b[1]-b[2]);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-
-	i++;
-	CARRY[i].push_back(b[0]);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-
-	i++;
-	CARRY[i].push_back(b[1]);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
-	CARRY[i].push_back(0);
-
-	i++;
-	CARRY[i].push_back(b[2]);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(0);
-	CARRY[i].push_back(1);
-	linf.matrix(CARRY, "CARRY");
-
+	// // Index set for basis columns
+	// basis.clear();
+	// basis.push_back(1);
+	// basis.push_back(2);
+	// basis.push_back(3);
+	// 
+	// // Righthand side
+	// b.clear();
+	// b.push_back(1);
+	// b.push_back(3);
+	// b.push_back(4);
+	// ldbg.vec(b, "b");
+	// 
+	// // Matrix A
+	// A.clear();
+	// A.push_back(vector<mpq_class>());
+	// A.push_back(vector<mpq_class>());
+	// A.push_back(vector<mpq_class>());
+	// A[0].push_back(3);
+	// A[0].push_back(2);
+	// A[0].push_back(1);
+	// A[0].push_back(0);
+	// A[0].push_back(0);
+	// 
+	// A[1].push_back(5);
+	// A[1].push_back(1);
+	// A[1].push_back(1);
+	// A[1].push_back(1);
+	// A[1].push_back(0);
+	// 
+	// A[2].push_back(2);
+	// A[2].push_back(5);
+	// A[2].push_back(1);
+	// A[2].push_back(0);
+	// A[2].push_back(1);
+	// ldbg.matrix(A, "A");
+	// 
+	// // Cost coefficients c
+	// c.clear();
+	// c.push_back(1);
+	// c.push_back(1);
+	// c.push_back(1);
+	// c.push_back(1);
+	// c.push_back(1);
+	// ldbg.vec(c, "c");
+	// 
+	// 
+	// // // Carry Matrix
+	// // CARRY.clear();
+	// // CARRY.push_back(vector<mpq_class>());
+	// // CARRY.push_back(vector<mpq_class>());
+	// // CARRY.push_back(vector<mpq_class>());
+	// // CARRY.push_back(vector<mpq_class>());
+	// // CARRY.push_back(vector<mpq_class>());
+	// // 
+	// // int i = 0;
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // 
+	// // i++;
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // 
+	// // i++;
+	// // CARRY[i].push_back(b[0]);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(3);
+	// // CARRY[i].push_back(2);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // 
+	// // i++;
+	// // CARRY[i].push_back(b[1]);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(5);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(0);
+	// // 
+	// // i++;
+	// // CARRY[i].push_back(b[2]);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(2);
+	// // CARRY[i].push_back(5);
+	// // CARRY[i].push_back(1);
+	// // CARRY[i].push_back(0);
+	// // CARRY[i].push_back(1);
+	// // ldbg.matrix(CARRY, "CARRY");
+	// // 
+	// // Matrix::rowSubtract(CARRY, 1, 2);
+	// // Matrix::rowSubtract(CARRY, 1, 3);
+	// // Matrix::rowSubtract(CARRY, 1, 4);
+	// // ldbg.matrix(CARRY, "CARRY");
+	// // Matrix::pivot(CARRY, CARRY, 2, 4);
+	// // ldbg.matrix(CARRY, "CARRY");
+	// // Matrix::pivot(CARRY, CARRY, 2, 5);
+	// // ldbg.matrix(CARRY, "CARRY");
+	// // Matrix::pivot(CARRY, CARRY, 3, 7);
+	// // ldbg.matrix(CARRY, "CARRY");
+	// // Matrix::pivot(CARRY, CARRY, 4, 8);
+	// // ldbg.matrix(CARRY, "CARRY");
+	// // ldbg.message("=================");
+	// 
+	// // Carry-Matrix
+	// CARRY.clear();
+	// CARRY.push_back(vector<mpq_class>());
+	// CARRY.push_back(vector<mpq_class>());
+	// CARRY.push_back(vector<mpq_class>());
+	// CARRY.push_back(vector<mpq_class>());
+	// 
+	// int i = 0;
+	// CARRY[i].push_back(-b[0]-b[1]-b[2]);
+	// CARRY[i].push_back(0);
+	// CARRY[i].push_back(0);
+	// CARRY[i].push_back(0);
+	// 
+	// i++;
+	// CARRY[i].push_back(b[0]);
+	// CARRY[i].push_back(1);
+	// CARRY[i].push_back(0);
+	// CARRY[i].push_back(0);
+	// 
+	// i++;
+	// CARRY[i].push_back(b[1]);
+	// CARRY[i].push_back(0);
+	// CARRY[i].push_back(1);
+	// CARRY[i].push_back(0);
+	// 
+	// i++;
+	// CARRY[i].push_back(b[2]);
+	// CARRY[i].push_back(0);
+	// CARRY[i].push_back(0);
+	// CARRY[i].push_back(1);
+	// linf.matrix(CARRY, "CARRY");
+	// exit(0);
 	// Size of the problem. The real tableau would have size (m+1) x (n+1).
 	// The carry-matrix has size (m+1) x (m+1)
 	// The coefficient-matrix has size m x n
