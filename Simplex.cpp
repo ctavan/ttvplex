@@ -9,12 +9,13 @@ Simplex::Simplex() {
 
 void Simplex::init(LPParser& lp)
 {
+	ldbg << "Filling vector b with righthandsides from the LP.\n";
+	b.clear();
 	for (unsigned i = 0; i < lp.constraints.size(); i++)
 	{
-		lp.constraints[i].rhs;
+		b.push_back(lp.constraints[i].rhs);
 	}
-
-
+	ldbg.vec(b, "b");
 
 	exit(0);
 	// Index set for basis columns
