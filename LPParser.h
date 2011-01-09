@@ -40,11 +40,17 @@ struct LPVariable
 	\return void
 	\sa
 **/
-	void dump()
+	void dump(const bool& detailed = false)
 	{
-		// linf << "\tCoeff:\t" << coeff << "\n";
-		// linf << "\tName:\t" << name << "\n";
-		linf << "+ " << coeff << " " << name << " ";
+		if (detailed)
+		{
+			linf << "\tCoeff:\t" << coeff << "\n";
+			linf << "\tName:\t" << name << "\n";
+		}
+		else
+		{
+			linf << "+ " << coeff << " " << name << " ";
+		}
 	}
 };
 
@@ -90,23 +96,29 @@ struct LPObjective
 	\return void
 	\sa
 **/
-	void dump()
+	void dump(const bool& detailed = false)
 	{
-		// linf << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
-		// linf << "Name:\t\t" << name << "\n";
-		// linf << "Offset:\t\t" << offset << "\n";
-		// linf << "Elements:\n";
-		// for (unsigned i = 0; i < elements.size(); i++)
-		// {
-		// 	elements[i].dump();
-		// }
-		linf << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
-		linf << name << ": ";
-		for (unsigned i = 0; i < elements.size(); i++)
+		if (detailed)
 		{
-			elements[i].dump();
+			linf << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
+			linf << "Name:\t\t" << name << "\n";
+			linf << "Offset:\t\t" << offset << "\n";
+			linf << "Elements:\n";
+			for (unsigned i = 0; i < elements.size(); i++)
+			{
+				elements[i].dump(detailed);
+			}
 		}
-		linf << " + " << offset << "\n";
+		else
+		{
+			linf << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
+			linf << name << ": ";
+			for (unsigned i = 0; i < elements.size(); i++)
+			{
+				elements[i].dump(detailed);
+			}
+			linf << " + " << offset << "\n";
+		}
 	}
 };
 
@@ -159,22 +171,28 @@ struct LPConstraint
 	\return void
 	\sa
 **/
-	void dump()
+	void dump(const bool& detailed = false)
 	{
-		// linf << "Name:\t\t" << name << "\n";
-		// linf << "Elements:\n";
-		// for (unsigned i = 0; i < elements.size(); i++)
-		// {
-		// 	elements[i].dump();
-		// }
-		// linf << "Relation:\t" << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << "\n";
-		// linf << "RHS:\t\t" << rhs << "\n";
-		linf << name << ": ";
-		for (unsigned i = 0; i < elements.size(); i++)
+		if (detailed)
 		{
-			elements[i].dump();
+			linf << "Name:\t\t" << name << "\n";
+			linf << "Elements:\n";
+			for (unsigned i = 0; i < elements.size(); i++)
+			{
+				elements[i].dump(detailed);
+			}
+			linf << "Relation:\t" << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << "\n";
+			linf << "RHS:\t\t" << rhs << "\n";
 		}
-		linf << " " << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << " " << rhs << "\n";
+		else
+		{
+			linf << name << ": ";
+			for (unsigned i = 0; i < elements.size(); i++)
+			{
+				elements[i].dump(detailed);
+			}
+			linf << " " << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << " " << rhs << "\n";
+		}
 	}
 };
 
@@ -224,16 +242,22 @@ struct LPBound
 	\return void
 	\sa
 **/
-	void dump()
+	void dump(const bool& detailed = false)
 	{
-		// linf << "Name:\t\t" << name << "\n";
-		// linf << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
-		// linf << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
-		stringstream low;
-		low << lower;
-		stringstream up;
-		up << upper;
-		linf << (lower_unbound ? "-INF" : low.str()) << " <= " << name << " <= " << (upper_unbound ? "+INF" : up.str()) << "\n";
+		if (detailed)
+		{
+			linf << "Name:\t\t" << name << "\n";
+			linf << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
+			linf << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
+		}
+		else
+		{
+			stringstream low;
+			low << lower;
+			stringstream up;
+			up << upper;
+			linf << (lower_unbound ? "-INF" : low.str()) << " <= " << name << " <= " << (upper_unbound ? "+INF" : up.str()) << "\n";
+		}
 	}
 };
 
