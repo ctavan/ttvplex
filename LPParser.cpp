@@ -462,12 +462,12 @@ void LPParser::boundconstraints()
 					{
 						continue;
 					}
-					ldbg << "Found variable " << oldname << " in this objective, adjusting rhs.\n";
+					ldbg << "Found variable " << oldname << " in this constraint, adjusting rhs.\n";
 					// b_x = x - lower => x = b_x + lower
-					constraints[j].dump();
+					// constraints[j].dump();
 					constraints[j].elements[k].name = newname;
 					constraints[j].rhs -= constraints[j].elements[k].coeff*lower;
-					constraints[j].dump();
+					// constraints[j].dump();
 				}
 			}
 		}
@@ -475,7 +475,49 @@ void LPParser::boundconstraints()
 		if (bounds[i].lower_unbound && bounds[i].upper_unbound)
 		{
 			ldbg << "Variable " << bounds[i].name << " is unbounded.\n";
-			exit(0);
+
+			// Split variable
+			variables.splitPlusMinus(bounds[i].name);
+
+			string oldname = bounds[i].name;
+			string pname = variables.split_prefix_p + oldname;
+			string mname = variables.split_prefix_m + oldname;
+
+			// Replace variable in the objective, and account for the offset
+			for (unsigned j = 0; j < objective.elements.size(); j++)
+			{
+				if (objective.elements[j].name != oldname)
+				{
+					continue;
+				}
+				ldbg << "Oldcoeff " << objective.elements[j].coeff << " bounds lower" << "\n";
+				objective.elements[j].name = pname;
+				LPVariable mvar;
+				mvar.name = mname;
+				mvar.coeff = -1*objective.elements[j].coeff;
+				objective.elements.push_back(mvar);
+			}
+
+			// Replace variable in the constraints
+			for (unsigned j = 0; j < constraints.size(); j++)
+			{
+				for (unsigned k = 0; k < constraints[j].elements.size(); k++)
+				{
+					if (constraints[j].elements[k].name != oldname)
+					{
+						continue;
+					}
+					ldbg << "Found variable " << oldname << " in this constraint, replacing by split variable.\n";
+					// b_x = x - lower => x = b_x + lower
+					// constraints[j].dump();
+					constraints[j].elements[k].name = pname;
+					LPVariable mvar;
+					mvar.name = mname;
+					mvar.coeff = -1*constraints[j].elements[k].coeff;
+					constraints[j].elements.push_back(mvar);
+					// constraints[j].dump();
+				}
+			}
 		}
 	}
 }
@@ -676,4 +718,20 @@ void LPParser::parse_varcoeff(string str, vector<LPVariable>& elements)
 		elements.push_back(var);
 	}
 	ldbg << "LPParser: Generated variable '" << var.name << "' with coefficient '" << var.coeff << "'\n";
+}
+
+void LPParser::dump_constraints()
+{
+	
+}
+
+void LPParser::dump_objective()
+{
+	
+}
+
+void LPParser::dump()
+{
+	dump_objective();
+	dump_constraints();
 }

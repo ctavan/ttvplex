@@ -43,8 +43,9 @@ struct LPVariable
 **/
 	void dump()
 	{
-		linf << "\tCoeff:\t" << coeff << "\n";
-		linf << "\tName:\t" << name << "\n";
+		// linf << "\tCoeff:\t" << coeff << "\n";
+		// linf << "\tName:\t" << name << "\n";
+		linf << "+ " << coeff << " " << name << " ";
 	}
 };
 
@@ -92,14 +93,21 @@ struct LPObjective
 **/
 	void dump()
 	{
-		linf << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
-		linf << "Name:\t\t" << name << "\n";
-		linf << "Offset:\t\t" << offset << "\n";
-		linf << "Elements:\n";
+		// linf << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
+		// linf << "Name:\t\t" << name << "\n";
+		// linf << "Offset:\t\t" << offset << "\n";
+		// linf << "Elements:\n";
+		// for (unsigned i = 0; i < elements.size(); i++)
+		// {
+		// 	elements[i].dump();
+		// }
+		linf << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
+		linf << name << ": ";
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
 			elements[i].dump();
 		}
+		linf << " + " << offset << "\n";
 	}
 };
 
@@ -154,14 +162,20 @@ struct LPConstraint
 **/
 	void dump()
 	{
-		linf << "Name:\t\t" << name << "\n";
-		linf << "Elements:\n";
+		// linf << "Name:\t\t" << name << "\n";
+		// linf << "Elements:\n";
+		// for (unsigned i = 0; i < elements.size(); i++)
+		// {
+		// 	elements[i].dump();
+		// }
+		// linf << "Relation:\t" << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << "\n";
+		// linf << "RHS:\t\t" << rhs << "\n";
+		linf << name << ": ";
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
 			elements[i].dump();
 		}
-		linf << "Relation:\t" << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << "\n";
-		linf << "RHS:\t\t" << rhs << "\n";
+		linf << " " << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << " " << rhs << "\n";
 	}
 };
 
@@ -213,9 +227,14 @@ struct LPBound
 **/
 	void dump()
 	{
-		linf << "Name:\t\t" << name << "\n";
-		linf << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
-		linf << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
+		// linf << "Name:\t\t" << name << "\n";
+		// linf << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
+		// linf << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
+		stringstream low;
+		low << lower;
+		stringstream up;
+		up << upper;
+		linf << (lower_unbound ? "-INF" : low.str()) << " <= " << name << " <= " << (upper_unbound ? "+INF" : up.str()) << "\n";
 	}
 };
 
@@ -238,7 +257,10 @@ struct LPVarlist
 	int ns;						//!< Number of slack and surplus variables
 	string s_prefix;			//!< String prefix of slack and surplus variables
 	int nbound;					//!< Number of variables that have been introduced for nonzero lower bounds
-	string bound_prefix;		//!< Suffix variables that have nonzero lower bound are replaced with
+	string bound_prefix;		//!< Prefix variables that have nonzero lower bound are replaced with
+	int nsplit;					//!< Number of unbounded variables that have been split into two vars >= 0
+	string split_prefix_p;		//!< Prefix for the plus part of a split unbounded variable
+	string split_prefix_m;		//!< Prefix for the minus part of a split unbounded variable
 /** \brief Constructor
 	
 	Member Variables are initialized as follows:
@@ -251,7 +273,7 @@ struct LPVarlist
 	\return void
 	\sa
 **/
-	LPVarlist() : ns(0), s_prefix("s_"), nbound(0), bound_prefix("b_") {}
+	LPVarlist() : ns(0), s_prefix("s_"), nbound(0), bound_prefix("b_"), nsplit(0), split_prefix_p("plus_"), split_prefix_m("minus_") {}
 /** \brief Adds a variable named by name to the list only if it is not yet in the list
 	
 	\author Christoph Tavan TU Berlin
@@ -337,6 +359,34 @@ struct LPVarlist
 		int i = indexOf(name);
 		elements[i] = bound_prefix + name;
 		return elements[i];
+	}
+	void splitPlusMinus(const string& name)
+	{
+		// First determine the slack/surplus-variable prefix (must be unique)
+		if (nsplit < 1)
+		{
+			ldbg << "Determining unique bound variable prefix.\n";
+			// Append '_' to the split_prefix_p, until it is assured that unique variables are generated
+			while (indexOf(split_prefix_p, true) >= 0)
+			{
+				ldbg << "Is there a variable containing the split-prefix '" << split_prefix_p << "'?" << indexOf(split_prefix_p, true) << "\n";
+				split_prefix_p += "_";
+			}
+			ldbg << "Found unique bound-prefix '" << split_prefix_p << "'\n";
+			// Append '_' to the split_prefix_p, until it is assured that unique variables are generated
+			while (indexOf(split_prefix_m, true) >= 0)
+			{
+				ldbg << "Is there a variable containing the split-prefix '" << split_prefix_m << "'?" << indexOf(split_prefix_m, true) << "\n";
+				split_prefix_m += "_";
+			}
+			ldbg << "Found unique bound-prefix '" << split_prefix_m << "'\n";
+		}
+		nsplit++;
+		int i = indexOf(name);
+		elements[i] = split_prefix_p + name;
+		string minus_name;
+		minus_name = split_prefix_m + name;
+		elements.push_back(minus_name);
 	}
 /** \brief Convenience method to dump an object of type LPVarlist
 	
@@ -540,6 +590,10 @@ class LPParser
 	\sa
 **/
 		void slacksurplus();
+
+		void dump();
+		void dump_objective();
+		void dump_constraints();
 };
 
 #endif
