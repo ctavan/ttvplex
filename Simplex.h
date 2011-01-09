@@ -3,6 +3,8 @@
 
 #include "global.h"
 
+#include "LPParser.h"
+
 using namespace std;
 
 /** \brief  Revised Simplex Algorithm
@@ -31,7 +33,7 @@ class Simplex {
 	\return void
 	\sa
 **/
-		void init();
+		void init(LPParser& lp);
 /** \brief Pricing operation
 	
 		Performs the pricing operation of the revised simplex algorithm. The non-basic columns are checked whether

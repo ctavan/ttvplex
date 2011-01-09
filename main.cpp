@@ -68,8 +68,8 @@ int main(int argc, char** argv)
 	lp.read();
 	lp.standardize();
 
-	// Simplex smp;
-	// smp.init(lp);
+	Simplex smp;
+	smp.init(lp);
 
 	exit(EXIT_SUCCESS);
 

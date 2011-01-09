@@ -613,10 +613,42 @@ class LPParser
 	\sa
 **/
 		void slacksurplus();
-
-		void dump();
-		void dump_objective();
-		void dump_constraints();
+/** \brief Assure that all righthandsides are positive
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-09
+	\return void
+	\sa
+**/
+		void positive_rhs();
+/** \brief Print out the LP
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-09
+	\sa
+**/
+		void dump(const bool& detailed = false);
+/** \brief Print out the Objective
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-09
+	\sa
+**/
+		void dump_objective(const bool& detailed = false);
+/** \brief Print out the Constraints
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-09
+	\sa
+**/
+		void dump_constraints(const bool& detailed = false);
+/** \brief Print out the Bounds
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-09
+	\sa
+**/
+		void dump_bounds(const bool& detailed = false);
 };
 
 #endif

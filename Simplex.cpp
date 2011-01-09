@@ -7,8 +7,16 @@ Simplex::Simplex() {
 	optimal = false;
 }
 
-void Simplex::init()
+void Simplex::init(LPParser& lp)
 {
+	for (unsigned i = 0; i < lp.constraints.size(); i++)
+	{
+		lp.constraints[i].rhs;
+	}
+
+
+
+	exit(0);
 	// Index set for basis columns
 	basis.clear();
 	basis.push_back(1);

@@ -343,18 +343,9 @@ void LPParser::read()
 				break;
 		}
 	}
-	linf << "Objective:\n";
-	objective.dump();
-	linf << "Constraints:\n";
-	for (unsigned i = 0; i < constraints.size(); i++)
-	{
-		constraints[i].dump();
-	}
-	linf << "Bounds:\n";
-	for (unsigned i = 0; i < bounds.size(); i++)
-	{
-		bounds[i].dump();
-	}
+
+	// Dump the lp
+	dump();
 
 	// Finally collect all variables of the system
 	collect_variables();
@@ -390,22 +381,11 @@ void LPParser::standardize()
 	linf << "LPParser: Bringing the LP to standard form\n";
 	boundconstraints();
 	slacksurplus();
+	positive_rhs();
 
 	linf << "===================================================\n";
 	linf << "LP now in standard form\n";
-	linf << "Objective:\n";
-	objective.dump();
-	linf << "Constraints:\n";
-	for (unsigned i = 0; i < constraints.size(); i++)
-	{
-		constraints[i].dump();
-	}
-	linf << "Bounds:\n";
-	for (unsigned i = 0; i < bounds.size(); i++)
-	{
-		bounds[i].dump();
-	}
-	variables.dump();
+	dump();
 }
 
 void LPParser::boundconstraints()
@@ -544,6 +524,25 @@ void LPParser::slacksurplus()
 		constraints[i].elements.push_back(slacksurplus);
 		// Since we've now added slack/surplus variable, we get an equal-constraint!
 		constraints[i].relation = LPConstraint::REL_EQ;
+	}
+}
+
+void LPParser::positive_rhs()
+{
+	ldbg << "LPParser: Assuring positive righthandsides\n";
+	for (unsigned i = 0; i < constraints.size(); i++)
+	{
+		// If rhs is positive, everything is ok
+		if (constraints[i].rhs >= 0)
+		{
+			continue;
+		}
+		// Otherwise multiply all coefficients and the rhs by -1
+		constraints[i].rhs *= -1;
+		for (unsigned j = 0; j < constraints[i].elements.size(); j++)
+		{
+			constraints[i].elements[j].coeff *= -1;
+		}
 	}
 }
 
@@ -719,18 +718,33 @@ void LPParser::parse_varcoeff(string str, vector<LPVariable>& elements)
 	ldbg << "LPParser: Generated variable '" << var.name << "' with coefficient '" << var.coeff << "'\n";
 }
 
-void LPParser::dump_constraints()
+void LPParser::dump_objective(const bool& detailed)
 {
-	
+	linf << "Objective:\n";
+	objective.dump(detailed);
 }
 
-void LPParser::dump_objective()
+void LPParser::dump_constraints(const bool& detailed)
 {
-	
+	linf << "Constraints:\n";
+	for (unsigned i = 0; i < constraints.size(); i++)
+	{
+		constraints[i].dump(detailed);
+	}	
 }
 
-void LPParser::dump()
+void LPParser::dump_bounds(const bool& detailed)
 {
-	dump_objective();
-	dump_constraints();
+	linf << "Bounds:\n";
+	for (unsigned i = 0; i < bounds.size(); i++)
+	{
+		bounds[i].dump(detailed);
+	}
+}
+
+void LPParser::dump(const bool& detailed)
+{
+	dump_objective(detailed);
+	dump_constraints(detailed);
+	dump_bounds(detailed);
 }
