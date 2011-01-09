@@ -9,13 +9,56 @@ Simplex::Simplex() {
 
 void Simplex::init(LPParser& lp)
 {
-	ldbg << "Filling vector b with righthandsides from the LP.\n";
+	ldbg << "Filling vector b with righthandsides from the constraints.\n";
 	b.clear();
 	for (unsigned i = 0; i < lp.constraints.size(); i++)
 	{
 		b.push_back(lp.constraints[i].rhs);
 	}
 	ldbg.vec(b, "b");
+
+	ldbg << "Filling matrix A with coefficients from the constraints.\n";
+	A.clear();
+	for (unsigned i = 0; i < lp.constraints.size(); i++)
+	{
+		// Create a new row for each constraint
+		A.push_back(vector<mpq_class>());
+		// Loop through all variables, that are in the system
+		for (unsigned j = 0; j < lp.variables.elements.size(); j++)
+		{
+			// For each variable, check if it is used in the current constraint
+			mpq_class val = 0;
+			for (unsigned k = 0; k < lp.constraints[i].elements.size(); k++)
+			{
+				if (lp.constraints[i].elements[k].name == lp.variables.elements[j])
+				{
+					val = lp.constraints[i].elements[k].coeff;
+					break;
+				}
+				// ldbg << "Variable " << lp.variables.elements[j] << " is in constraint " << lp.constraints[i].name << "\n";
+			}
+			A[i].push_back(val);
+		}
+	}
+	ldbg.matrix(A, "A");
+
+	ldbg << "Filling vector c with costs from the objective.\n";
+	c.clear();
+	// Loop through all variables, that are in the system
+	for (unsigned j = 0; j < lp.variables.elements.size(); j++)
+	{
+		mpq_class val = 0;
+		for (unsigned i = 0; i < lp.objective.elements.size(); i++)
+		{
+			if (lp.variables.elements[j] == lp.objective.elements[i].name)
+			{
+				val = lp.objective.elements[i].coeff;
+				break;
+			}
+		}
+		c.push_back(val);
+	}
+	ldbg.vec(c, "c");
 
 	exit(0);
 	// Index set for basis columns

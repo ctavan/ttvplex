@@ -56,6 +56,7 @@ void Log::matrix(vector< vector< mpq_class > > m, string name)
 	}
 	(ostream&)*this << "Dumping " << m.size() << "x" << m[0].size() << " matrix " << name << ":" << endl;
 	for (unsigned i = 0; i < m.size(); i++) {
+		(ostream&)*this << "> ";
 		for (unsigned j = 0; j < m[i].size(); j++) {
 			(ostream&)*this << m[i][j] << "\t";
 		}
