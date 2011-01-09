@@ -6,7 +6,6 @@
 #include <algorithm>
 
 using namespace std;
-using namespace cln;
 
 /** \brief  Class holding a coefficient-variable-pair
 	

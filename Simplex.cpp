@@ -1,7 +1,6 @@
 #include "Simplex.h"
 
 using namespace std;
-using namespace cln;
 
 // Constructor
 Simplex::Simplex() {
@@ -25,9 +24,9 @@ void Simplex::init()
 
 	// Matrix A
 	A.clear();
-	A.push_back(vector<cl_RA>());
-	A.push_back(vector<cl_RA>());
-	A.push_back(vector<cl_RA>());
+	A.push_back(vector<mpq_class>());
+	A.push_back(vector<mpq_class>());
+	A.push_back(vector<mpq_class>());
 	A[0].push_back(3);
 	A[0].push_back(2);
 	A[0].push_back(1);
@@ -59,11 +58,11 @@ void Simplex::init()
 
 	// Carry Matrix
 	CARRY.clear();
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
 
 	int i = 0;
 	CARRY[i].push_back(0);
@@ -137,10 +136,10 @@ void Simplex::init()
 
 	// Carry-Matrix
 	CARRY.clear();
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
-	CARRY.push_back(vector<cl_RA>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<mpq_class>());
 
 	i = 0;
 	CARRY[i].push_back(-b[0]-b[1]-b[2]);
@@ -186,7 +185,7 @@ void Simplex::init()
 		optimal = false;
 
 		// Pricing
-		cl_RA s_cost;				// Reduced cost of the column that will enter the basis
+		mpq_class s_cost;				// Reduced cost of the column that will enter the basis
 		int s = pricing(s_cost);	// Index of the column that will enter the basis wrt. the matrix A
 		linf << "Pricing operation selected column: " << s << " with reduced cost " << s_cost << "\n";
 		if (optimal == true) {
@@ -198,10 +197,10 @@ void Simplex::init()
 
 		// Column generation
 		ldbg << "Starting column generation.\n";
-		vector< cl_RA > Xs;
+		vector< mpq_class > Xs;
 		Xs.clear();
 		for (unsigned i = 1; i < (m+1); i++) { // loop through rows
-			cl_RA row_sum = 0;
+			mpq_class row_sum = 0;
 			for (unsigned j = 1; j < (m+1); j++) {
 				ldbg << "Indices: " << i << "," << j << "," << s << "\n";
 				row_sum += CARRY[i][j]*A[j-1][s];
@@ -212,14 +211,14 @@ void Simplex::init()
 		linf.vec(Xs, "Xs");
 
 		// Determine pivot element
-		cl_RA min = -1;
+		mpq_class min = -1;
 		unsigned r = 0;
 		for (unsigned i = 1; i < (m+1); i++) {
 			if (Xs[i-1] == 0) {
 				ldbg << "Xs[" << (i-1) << "] == 0" << "\n";
 				continue;
 			}
-			cl_RA cur = CARRY[i][0]/Xs[i-1];
+			mpq_class cur = CARRY[i][0]/Xs[i-1];
 			ldbg << "Pivot here? " << cur << "\n";
 			if (cur < 0) {
 				ldbg << "Current value negative: " << cur << "\n";
@@ -239,7 +238,7 @@ void Simplex::init()
 		// Pivot
 
 		// Make sure the target matrix B holds a copy of the inital matrix A
-		vector< vector< cl_RA > > CARRY_Xs;
+		vector< vector< mpq_class > > CARRY_Xs;
 		CARRY_Xs = CARRY;
 		CARRY_Xs[0].push_back(s_cost);
 		CARRY_Xs[1].push_back(Xs[0]);
@@ -272,10 +271,10 @@ void Simplex::phase2()
 {
 }
 
-unsigned Simplex::pricing(cl_RA &cost_s)
+unsigned Simplex::pricing(mpq_class &cost_s)
 {
 	int s = 0;
-	vector<cl_RA> costs;
+	vector<mpq_class> costs;
 	for (unsigned j = 0; j < n; j++) {
 		bool is_basic = false;
 
@@ -293,14 +292,14 @@ unsigned Simplex::pricing(cl_RA &cost_s)
 		}
 
 		// pi^T A_j
-		cl_RA cost = 0;
+		mpq_class cost = 0;
 		for (unsigned k = 1; k < (m+1); k++) {
 			cost += CARRY[0][k]*A[k-1][j];
 			ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
 		}
 		ldbg << "Cost c = " << cost << "\n";
 
-		cl_RA d = 0;
+		mpq_class d = 0;
 		for (unsigned k = 0; k < m; k++) {
 			d -= A[k][j];
 		}
@@ -311,7 +310,7 @@ unsigned Simplex::pricing(cl_RA &cost_s)
 		ldbg << "Reduced cost = " << cost << "\n";
 	}
 	ldbg.vec(costs, "costs");
-	cl_RA min_cost = costs[0];
+	mpq_class min_cost = costs[0];
 	// Find minimum cost
 	for (unsigned i = 1; i < costs.size(); i++) {
 		if (costs[i] < min_cost) {

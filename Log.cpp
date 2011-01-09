@@ -1,7 +1,6 @@
 #include "Log.h"
 
 using namespace std;
-using namespace cln;
 
 // Constructor
 Log::Log(ostream& out, int level): ostream(out.rdbuf()), level(level) {
@@ -19,7 +18,7 @@ void Log::message(string text)
 	(ostream&)*this << text << endl;
 }
 
-void Log::vec(vector< cl_RA > v, string name)
+void Log::vec(vector< mpq_class > v, string name)
 {
 	if (level < 1) {
 		return;
@@ -50,7 +49,7 @@ void Log::vec(vector< string > v, string name)
 	}
 }
 
-void Log::matrix(vector< vector< cl_RA > > m, string name)
+void Log::matrix(vector< vector< mpq_class > > m, string name)
 {
 	if (level < 1) {
 		return;

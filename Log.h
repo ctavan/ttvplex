@@ -6,12 +6,11 @@
 #include <vector>
 #include <string>
 
-// Class library for numbers
-#include "cln.h"
+// GMP: The GNU Multiple Precision Arithmetic Library
+#include <gmpxx.h>
 
 
 using namespace std;
-using namespace cln;
 
 /** \brief  Logging class
 	
@@ -70,7 +69,7 @@ class Log: public ostream{
 	\return void
 	\sa
 **/
-		void vec(vector< cl_RA > v, string name);
+		void vec(vector< mpq_class > v, string name);
 		void vec(vector< unsigned > v, string name);
 		void vec(vector< string > v, string name);
 /** \brief Dump a 2D-matrix
@@ -82,7 +81,7 @@ class Log: public ostream{
 	\return description of return value
 	\sa
 **/
-		void matrix(vector< vector<cl_RA> > m, string name);
+		void matrix(vector< vector<mpq_class> > m, string name);
 };
 
 #endif

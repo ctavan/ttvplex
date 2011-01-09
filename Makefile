@@ -1,14 +1,15 @@
 # Makefile for ttvplex
 
 # Location of CLN (http://www.ginac.de/CLN/) source (expected to lie in 'cln' subdirectory)
-CLN_INC = /opt/local/include/
+# CLN_INC = /opt/local/include/
 # Location of compiled CLN library
-CLN_LIB = /opt/local/lib/libcln.a
+# CLN_LIB = /opt/local/lib/libcln.a
 # Location of the compiled GMP library which is required by CLN
+GMP_INC = /opt/local/include/
 GMP_LIB = /opt/local/lib/libgmp.a /opt/local/lib/libgmpxx.a
 
 # Include paths that should be searched
-INCLUDE = -I$(CLN_INC) -I./
+INCLUDE = -I$(GMP_INC) -I./
 # C compiler command. We use the GNU C++ compiler
 CC = g++
 # Compiler flags
@@ -16,7 +17,7 @@ CFLAGS = -O2 -g -Wall
 # Linker flags
 LDFLAGS = -lm
 # Paths of third party libraries that are used
-LIBS = $(GMP_LIB) $(CLN_LIB)
+LIBS = $(GMP_LIB)
 
 # Name of the executable
 PROGRAMNAME = ttvplex

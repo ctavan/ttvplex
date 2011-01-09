@@ -4,7 +4,6 @@
 #include "global.h"
 
 using namespace std;
-using namespace cln;
 
 /** \brief  Revised Simplex Algorithm
 	
@@ -43,20 +42,20 @@ class Simplex {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-27
-	\param cl_RA Reference to a variable which is used to return the reduced cost of column that will enter the basis
+	\param mpq_class Reference to a variable which is used to return the reduced cost of column that will enter the basis
 	\return unsigned The column index (relative to the entire tableau) of the column that will enter the basis
 	\sa
 **/
-		unsigned pricing(cl_RA &cost_s);
+		unsigned pricing(mpq_class &cost_s);
 		void phase2();
 
 		unsigned m; //!< Number of rows of the initial matrix
 		unsigned n; //!< Number of columns of the initial matrix
 		bool optimal;	//!< Whether we're optimal or not. Used to stop the simplex iterations
-		vector< vector< cl_RA > > A; //!< Initial coefficient matrix
-		vector< cl_RA > b; //!< Initial righthand side
-		vector< cl_RA > c; //!< Initial cost coefficients
-		vector< vector< cl_RA > > CARRY; //!< Carry^0-Matrix
+		vector< vector< mpq_class > > A; //!< Initial coefficient matrix
+		vector< mpq_class > b; //!< Initial righthand side
+		vector< mpq_class > c; //!< Initial cost coefficients
+		vector< vector< mpq_class > > CARRY; //!< Carry^0-Matrix
 		vector< unsigned > basis; //!< Index-set of current matrix columns
 };
 

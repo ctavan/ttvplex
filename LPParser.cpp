@@ -1,7 +1,6 @@
 #include "LPParser.h"
 
 using namespace std;
-using namespace cln;
 
 // Constructor
 LPParser::LPParser(string filename)

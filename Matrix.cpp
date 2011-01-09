@@ -1,31 +1,30 @@
 #include "Matrix.h"
 
 using namespace std;
-using namespace cln;
 
 // Constructor
 Matrix::Matrix()
 {
 }
 
-cl_RA Matrix::det(vector< vector< cl_RA > > A)
+mpq_class Matrix::det(vector< vector< mpq_class > > A)
 {
-	return (cl_RA)0;
+	return (mpq_class)0;
 }
 
-void Matrix::transpose(vector< vector< cl_RA > > A, vector< vector< cl_RA > > At)
-{
-}
-
-void Matrix::multiply(vector< vector< cl_RA > > A, vector< vector< cl_RA > > B, vector< vector< cl_RA > > R)
+void Matrix::transpose(vector< vector< mpq_class > > A, vector< vector< mpq_class > > At)
 {
 }
 
-void Matrix::inverse(vector< vector< cl_RA > > A, vector< vector< cl_RA > > Ai)
+void Matrix::multiply(vector< vector< mpq_class > > A, vector< vector< mpq_class > > B, vector< vector< mpq_class > > R)
 {
 }
 
-void Matrix::pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > >& B, int i, int j)
+void Matrix::inverse(vector< vector< mpq_class > > A, vector< vector< mpq_class > > Ai)
+{
+}
+
+void Matrix::pivot(vector< vector< mpq_class > > A, vector< vector< mpq_class > >& B, int i, int j)
 {
 	ldbg << "Pivoting on element: [" << i << "][" << j << "]\n";
 
@@ -45,7 +44,7 @@ void Matrix::pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > >& B, in
 	}
 }
 
-void Matrix::rowSubtract(vector< vector< cl_RA > >& A, int i, int j)
+void Matrix::rowSubtract(vector< vector< mpq_class > >& A, int i, int j)
 {
 	ldbg << "Subtracting: row[" << i << "] - row[" << j << "]\n";
 

@@ -1,7 +1,6 @@
 #include "main.h"
 
 using namespace std;
-using namespace cln;
 
 int main(int argc, char** argv)
 {
@@ -69,10 +68,10 @@ int main(int argc, char** argv)
 	lp.read();
 	lp.standardize();
 
-	exit(EXIT_SUCCESS);
+	// Simplex smp;
+	// smp.init(lp);
 
-	Simplex smp;
-	smp.init();
+	exit(EXIT_SUCCESS);
 
 	return 0;
 }

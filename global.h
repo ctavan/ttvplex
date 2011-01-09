@@ -8,10 +8,8 @@
 #include <vector>
 #include <string>
 
+// GMP: The GNU Multiple Precision Arithmetic Library
 #include <gmpxx.h>
-
-// Class library for numbers
-#include "cln.h"
 
 // Local includes
 #include "Log.h"

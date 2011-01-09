@@ -4,7 +4,6 @@
 #include "global.h"
 
 using namespace std;
-using namespace cln;
 
 /** \brief  Matrix manipulation class
 	
@@ -30,10 +29,10 @@ class Matrix {
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
 	\param  vector m x m Matrix A
-	\return cl_RA Value of the determinant
+	\return mpq_class Value of the determinant
 	\sa
 **/
-		cl_RA det(vector< vector< cl_RA > > A);
+		mpq_class det(vector< vector< mpq_class > > A);
 /** \brief Transpose matrix
 	
 	Transpose matrix A and write the transposed matrix to At.
@@ -45,7 +44,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void transpose(vector< vector< cl_RA > > A, vector< vector< cl_RA > > At);
+		void transpose(vector< vector< mpq_class > > A, vector< vector< mpq_class > > At);
 /** \brief Matrix multiplication
 	
 	Multiply matrix A with matrix B and write result to matrix R.
@@ -58,7 +57,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void multiply(vector< vector< cl_RA > > A, vector< vector< cl_RA > > B, vector< vector< cl_RA > > R);
+		void multiply(vector< vector< mpq_class > > A, vector< vector< mpq_class > > B, vector< vector< mpq_class > > R);
 /** \brief Invert matrix
 	
 	Compute the inverse of matrix A and write it into Ai.
@@ -70,7 +69,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void inverse(vector< vector< cl_RA > > A, vector< vector< cl_RA > > Ai);
+		void inverse(vector< vector< mpq_class > > A, vector< vector< mpq_class > > Ai);
 /** \brief Perform pivot operation
 	
 	Perform a pivot operation on the given pivot-element ij (indices starting at 0)
@@ -84,7 +83,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		static void pivot(vector< vector< cl_RA > > A, vector< vector< cl_RA > > & B, int i, int j);
+		static void pivot(vector< vector< mpq_class > > A, vector< vector< mpq_class > > & B, int i, int j);
 /** \brief Subtract row j from row i
 	
 	Subtracts row j of input matrix A from row i. The input matrix is manipulated directly.
@@ -97,7 +96,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		static void rowSubtract(vector< vector< cl_RA > > & A, int i, int j);
+		static void rowSubtract(vector< vector< mpq_class > > & A, int i, int j);
 };
 
 #endif
