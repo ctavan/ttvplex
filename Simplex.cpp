@@ -103,7 +103,7 @@ void Simplex::init()
 void Simplex::optimize()
 {
 	int counter = 0;					// Counter to avoid infinite loops
-	const int max_iterations = 1000;	// Maximum number of iterations to be performed
+	const int max_iterations = 10;	// Maximum number of iterations to be performed
 
 	optimal = false;
 	phase = 1;
@@ -176,15 +176,19 @@ void Simplex::optimize()
 			break;
 		}
 
-		// Generate column s (is written to member vector X_s)
-		generate_col(s, cost_s);
+		// If selected column is NOT inside CARRY, generate it!
+		if (s >= CARRY[0].size())
+		{
+			// Generate column s (is written to member vector X_s)
+			generate_col(s, cost_s);
+		}
 
 		// Choose pivot element, i.e. determine row r. Pivot element is then x_rs
 		// r is counted w.r.t the original coefficient matrix A, not w.r.t. the tableau:
 		// so r = 0 means the first row that doesn't hold costs
-		choose_pivot(r);
+		choose_pivot(r, X_s);
 
-		linf << "=====> Let column " << basis[r] << " leave the basis and column " << (CARRY[0].size()+s) << " enter.\n";
+		linf << "=====> Let column " << basis[r] << " leave the basis and column " << s << " enter.\n";
 		linf << "Pivot element determined: r,s = " << r << "," << s << " (" << (r+1) << "," << (s+1) << ")\n";
 
 		vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
@@ -192,13 +196,13 @@ void Simplex::optimize()
 
 		// Perform Pivot
 		ldbg.matrix(CARRY_X_s, "CARRY_X_s");
-		// Pivot element in the carry-matrix is at row r+1 (since first row holds the cost
-		// and r = 0 is the first non-cost-row) and in the last column
-		Matrix::pivot(CARRY_X_s, CARRY_X_s, r+1, CARRY_X_s[0].size()-1);
+		// Pivot element in the carry-matrix is at row r (since 0th first row holds the cost
+		// ) and either in one of the columns contained in CARRY or in the last column which is X_s
+		Matrix::pivot(CARRY_X_s, CARRY_X_s, r, (s > CARRY[0].size() ? CARRY[0].size() : s));
 		ldbg.matrix(CARRY_X_s, "CARRY_X_s");
 
 		// Update the basis: Basis values count with respect to the whole tableau!
-		basis[r] = CARRY[0].size()+s;
+		basis[r] = s;
 		ldbg.vec(basis, "basis");
 
 		// Update carry matrix
@@ -225,16 +229,16 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 	s = 0;
 
 	// First of all check through the reduced costs, that are present in the CARRY-matrix!
-	// for (unsigned j = 1; j < CARRY[0].size(); j++)
-	// {
-	// 	ldbg << "Cost in CARRY: CARRY[0][" << i << "] = " << CARRY[0][i] << "\n";
-	// 	if (CARRY[0][i] < 0)
-	// 	{
-	// 		cost_s = CARRY[0][i];
-	// 		s = i;
-	// 		return;
-	// 	}
-	// }
+	for (unsigned j = 1; j < CARRY[0].size(); j++)
+	{
+		ldbg << "Cost in CARRY: CARRY[0][" << j << "] = " << CARRY[0][j] << "\n";
+		if (CARRY[0][j] < 0)
+		{
+			cost_s = CARRY[0][j];
+			s = j-1;
+			return;
+		}
+	}
 
 	vector<my_rational> costs;
 	for (unsigned j = 0; j < n; j++) {
@@ -279,14 +283,14 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 		}
 		costs.push_back(cost);
 
-		ldbg << "Phase " << phase << " reduced cost = " << cost << "\n";
+		ldbg << "Phase " << phase << " reduced cost = " << cost << " at column s = " << CARRY[0].size()+j << " (j = " << j << ")\n";
 
 		// If the first negative cost that is found, just use it because we want
 		// to prevent cycling using Blands rule.
 		// @see e.g. Papadimitriou/Steiglitz p. 53
 		if (cost < 0)
 		{
-			s = j;
+			s = CARRY[0].size()+j;
 			cost_s = cost;
 			return;
 		}
@@ -328,7 +332,7 @@ void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
 		my_rational row_sum = 0;
 		for (unsigned j = 1; j < (m+1); j++) {
 			// ldbg << "Indices: " << i << "," << j << "," << s << "\n";
-			row_sum += CARRY[i][j]*A[j-1][s];
+			row_sum += CARRY[i][j]*A[j-1][s-CARRY[0].size()];
 		}
 		X_s.push_back(row_sum);
 	}
@@ -336,7 +340,7 @@ void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
 	ldbg.vec(X_s, "X_s");
 }
 
-void Simplex::choose_pivot(unsigned& r)
+void Simplex::choose_pivot(unsigned& r, const vector<my_rational>& col)
 {
 	// Determine pivot element according to blands anti-cycling rule.
 	// @see e.g. Papadimitriou/Steiglitz p. 53
@@ -349,15 +353,15 @@ void Simplex::choose_pivot(unsigned& r)
 	// Loop through all rows
 	for (unsigned i = 1; i < (m+1); i++)
 	{
-		// assure x_ij > 0  (X_s[i] = x_ij)
-		if (X_s[i] == 0)
+		// assure x_ij > 0  (col[i] = x_ij)
+		if (col[i] == 0)
 		{
-			ldbg << "X_s[" << (i) << "] == 0" << "\n";
+			ldbg << "col[" << (i) << "] == 0" << "\n";
 			thetas.push_back(-1);
 			continue;
 		}
 		// x_i0 / x_ij
-		my_rational cur = CARRY[i][0]/X_s[i];
+		my_rational cur = CARRY[i][0]/col[i];
 		thetas.push_back(cur);
 		ldbg << "Pivot here? " << cur << "\n";
 		if (cur < 0)
@@ -406,6 +410,7 @@ void Simplex::choose_pivot(unsigned& r)
 		exit(EXIT_FAILURE);
 	}
 	r = (unsigned)rtemp;
+	r++;
 	linf << "r = " << r << " seems to be a suitable pivot element\n";
 }
 

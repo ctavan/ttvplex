@@ -53,15 +53,17 @@ class Simplex {
 		void generate_col(const unsigned& s, const my_rational& cost_s);
 /** \brief Chooses a suitable pivot element
 	
-		Chooses a suitable pivot row and writes the result into the variable r
+		Chooses a suitable pivot row and writes the result into the variable r.
+		r is an index with respect to the complete tableau.
 	
 	\author Christoph Tavan TU Berlin
 	\date 2011-01-11
 	\param unsigned Row-index of the chosen pivot-element
+	\param vector The column-vector that has been selected for pivoting before
 	\return void
 	\sa
 **/
-		void choose_pivot(unsigned& r);
+		void choose_pivot(unsigned& r, const vector<my_rational>& col);
 
 	public:
 		Simplex(LPParser &l) : phase(1), lp(l), optimal(false), infeasible(false) {};
