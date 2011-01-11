@@ -121,30 +121,30 @@ void Simplex::optimize()
 		// this variable will be set to true by the pricing routine.
 		optimal = false;
 
-		vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
-		TABLEAU = CARRY;
-		for (unsigned j = 0; j < n; j++)
-		{
-			my_rational cost = 0;
-			for (unsigned k = 1; k < (m+1); k++) {
-				cost += CARRY[0][k]*A[k-1][j];
-				// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
-			}
-			ldbg << "Cost c = " << cost << "\n";
-
-			my_rational d = 0;
-			if (phase == 1)
-			{
-				for (unsigned k = 0; k < m; k++) {
-					d -= A[k][j];
-				}
-				ldbg << "d = " << d << "\n";
-				cost = d + cost;
-			}
-			generate_col(j, cost);
-			Matrix::append_vec(TABLEAU, TABLEAU, X_s);
-		}
-		ldbg.matrix(TABLEAU, "TABLEAU");
+		// vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
+		// TABLEAU = CARRY;
+		// for (unsigned j = 0; j < n; j++)
+		// {
+		// 	my_rational cost = 0;
+		// 	for (unsigned k = 1; k < (m+1); k++) {
+		// 		cost += CARRY[0][k]*A[k-1][j];
+		// 		// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+		// 	}
+		// 	ldbg << "Cost c = " << cost << "\n";
+		// 
+		// 	my_rational d = 0;
+		// 	if (phase == 1)
+		// 	{
+		// 		for (unsigned k = 0; k < m; k++) {
+		// 			d -= A[k][j];
+		// 		}
+		// 		ldbg << "d = " << d << "\n";
+		// 		cost = d + cost;
+		// 	}
+		// 	generate_col(j, cost);
+		// 	Matrix::append_vec(TABLEAU, TABLEAU, X_s);
+		// }
+		// ldbg.matrix(TABLEAU, "TABLEAU");
 
 		// Pricing
 		pricing(cost_s, s);	// Index of the column that will enter the basis wrt. the matrix A
@@ -202,7 +202,7 @@ void Simplex::optimize()
 		ldbg.matrix(CARRY_X_s, "CARRY_X_s");
 
 		// Update the basis: Basis values count with respect to the whole tableau!
-		basis[r] = s;
+		basis[r-1] = s;
 		ldbg.vec(basis, "basis");
 
 		// Update carry matrix
@@ -235,7 +235,7 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 		if (CARRY[0][j] < 0)
 		{
 			cost_s = CARRY[0][j];
-			s = j-1;
+			s = j;
 			return;
 		}
 	}
