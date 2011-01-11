@@ -24,7 +24,7 @@ void Matrix::inverse(vector< vector< mpq_class > > A, vector< vector< mpq_class 
 {
 }
 
-void Matrix::pivot(vector< vector< mpq_class > > A, vector< vector< mpq_class > >& B, int i, int j)
+void Matrix::pivot(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const int& i, const int& j)
 {
 	ldbg << "Pivoting on element: [" << i << "][" << j << "]\n";
 
@@ -44,11 +44,23 @@ void Matrix::pivot(vector< vector< mpq_class > > A, vector< vector< mpq_class > 
 	}
 }
 
-void Matrix::rowSubtract(vector< vector< mpq_class > >& A, int i, int j)
+void Matrix::row_subtract(vector< vector< mpq_class > >& A, const int& i, const int& j)
 {
 	ldbg << "Subtracting: row[" << i << "] - row[" << j << "]\n";
 
 	for (unsigned s = 0; s < A[i].size(); s++) {
 		A[i][s] -= A[j][s];
+	}
+}
+
+// B = A|x
+void Matrix::append_vec(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const vector< mpq_class >& x)
+{
+	// Copy contents of matrix A into matrix B
+	B = A;
+	// Append column x_s to Matrix B
+	for (unsigned i = 0; i < x.size(); i++)
+	{
+		B[i].push_back(x[i]);
 	}
 }

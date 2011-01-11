@@ -3,4 +3,6 @@ Revised Simplex implementation
 
 NOTES
 =====
+ * Partial pricing could be implemented
+ * Anti-Cycling
  * There might be problems, if the upper bound of a variable is negative... Then one should substitute y = -x.

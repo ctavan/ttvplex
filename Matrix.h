@@ -76,14 +76,14 @@ class Matrix {
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
-	\param  vector Initial m x n Matrix A
 	\param  vector Final m x n Matrix B after pivoting
+	\param  vector Initial m x n Matrix A
 	\param  int i Row-index of pivot element
 	\param  int j Column-index of pivot element
 	\return void
 	\sa
 **/
-		static void pivot(vector< vector< mpq_class > > A, vector< vector< mpq_class > > & B, int i, int j);
+		static void pivot(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const int& i, const int& j);
 /** \brief Subtract row j from row i
 	
 	Subtracts row j of input matrix A from row i. The input matrix is manipulated directly.
@@ -96,7 +96,20 @@ class Matrix {
 	\return void
 	\sa
 **/
-		static void rowSubtract(vector< vector< mpq_class > > & A, int i, int j);
+		static void row_subtract(vector< vector< mpq_class > >& A, const int& i, const int& j);
+/** \brief Append vector x to matrix A
+	
+	Appends vector x to matrix A and writes the result to matrix B: B = A|x
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-11
+	\param vector Resulting matrix B
+	\param vector Initial matrix A
+	\param vector Column-vector to be appended to A
+	\return void
+	\sa
+**/
+		static void append_vec(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const vector< mpq_class >& x);
 };
 
 #endif

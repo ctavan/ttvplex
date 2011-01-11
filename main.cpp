@@ -70,6 +70,7 @@ int main(int argc, char** argv)
 
 	Simplex smp;
 	smp.init(lp);
+	smp.optimize();
 
 	exit(EXIT_SUCCESS);
 
