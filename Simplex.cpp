@@ -121,17 +121,7 @@ void Simplex::optimize()
 		// this variable will be set to true by the pricing routine.
 		optimal = false;
 
-		// Calculate the whole tableau (just for debugging)
-		vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
-		TABLEAU.clear();
-		TABLEAU = CARRY;
-		for (unsigned j = 0; j < n; j++)
-		{
-			my_rational cost = redcost(j);
-			generate_col(CARRY[0].size()+j, cost);
-			Matrix::append_vec(TABLEAU, TABLEAU, X_s);
-		}
-		ldbg.matrix(TABLEAU, "TABLEAU");
+		full_tableau();
 
 		// Pricing
 		pricing(cost_s, s);	// Index of the column that will enter the basis wrt. the matrix A
@@ -147,17 +137,78 @@ void Simplex::optimize()
 			// Phase 1: Objective is 0 -> Check if there are artificial variables left in the basis
 			if (phase == 1 && CARRY[0][0] == 0)
 			{
-				for (unsigned i = 0; i < basis.size(); i++)
+				while (phase == 1)
 				{
-					ldbg << "Checking if basis column b[" << i << "] = " << basis[i] << " is artificial variable, i.e. belongs to column 1 - " << m << " (0th col is RHS).\n";
-					if (basis[i] <= m)
+					for (unsigned i = 0; i < basis.size(); i++)
 					{
-						lout << "PHASE 1: Basic feasible solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
-						lout << "@TODO";
-						exit(EXIT_FAILURE);
+						ldbg << "Checking if basis column b[" << i << "] = " << basis[i] << " is artificial variable, i.e. belongs to column 1 - " << m << " (0th col is RHS).\n";
+						if (basis[i] <= m)
+						{
+							lout << "PHASE 1: Basic feasible solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
+							lout << "@TODO\n";
+							for (unsigned j = 0; j < n; j++)
+							{
+								ldbg << "~~ Checking column " << j << "\n";
+								// Check if column j is a basic column
+								if (is_basic(j))
+								{
+									continue;
+								}
+								ldbg << "~~ Generating non-basic column " << j << "\n";
+								// Generate j'th column
+								my_rational cost = redcost(j);
+								generate_col(CARRY[0].size()+j, cost);
+								ldbg << "x[i][j] = " << X_s[i+1] << "\n";
+								if (X_s[i+1] != 0)
+								{
+									ldbg << "@TODO: Pivot with this element!\n";
+									exit(EXIT_FAILURE);
+								}
+							}
+							ldbg << "PHASE 1: All x_ij = 0 in row i = " << i+1 << "\n";
+							ldbg << "erasing row " << i+1 << "\n";
+
+							ldbg.vec(basis, "basis");
+							basis.erase(basis.begin()+i);
+							// Adjust basis-indices (subtract -1) since we remove a column from the tableau
+							for (unsigned k = 0; k < basis.size(); k++)
+							{
+								if (basis[k] > i)
+								{
+									basis[k]--;
+								}
+							}
+							ldbg.vec(basis, "basis");
+
+							ldbg.vec(b, "b");
+							b.erase(b.begin()+i);
+							ldbg.vec(b, "b");
+
+							ldbg.matrix(A, "A");
+							A.erase(A.begin()+i);
+							ldbg.matrix(A, "A");
+
+							lout << "New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
+
+							ldbg.matrix(CARRY, "CARRY");
+							CARRY.erase(CARRY.begin()+i+1);
+							m--;
+							for (unsigned k = 0; k < CARRY.size(); k++)
+							{
+								CARRY[k].erase(CARRY[k].begin()+i+1);
+							}
+							ldbg.matrix(CARRY, "CARRY");
+							full_tableau();
+
+							ldbg << "Removed row " << i+1 << " from the system!\n";
+							continue;
+						}
+						// At this point we can enter phase 2
+						phase = 2;
 					}
-				}
+				} // while phase == 1
 				lout << "PHASE 1: Basic feasible solution found => continuing with PHASE 2!" << "\n";
+
 				phase = 2;
 				optimal = false;
 				lout << "PHASE 2: Starting\n";
@@ -191,7 +242,7 @@ void Simplex::optimize()
 				CARRY[0][0] = cost;
 				linf.matrix(CARRY, "CARRY");
 				continue;
-			}
+			} // phase == 1 && CARRY[0][0] == 0
 			linf.matrix(CARRY, "CARRY");
 			linf.matrix(CARRY, "CARRY", true);
 			linf.vec(basis, "basis");
@@ -270,22 +321,10 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 
 	vector<my_rational> costs;
 	for (unsigned j = 0; j < n; j++) {
-		bool is_basic = false;
-
-		ldbg << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column?";
-		for (unsigned k = 0; k < basis.size(); k++) {
-			// ldbg << "basis[" << k << "] = " << basis[k] << "\n";
-			if (basis[k] == (j+basis.size()+1)) {
-				is_basic = true;
-				break;
-			}
-		}
-		if (is_basic == true) {
-			ldbg << " => it is already in the basis! Skipping.\n";
+		if (is_basic(j)) {
 			costs.push_back(1); // Set positive fake cost to fill up the costs-vector
 			continue;
 		}
-		ldbg << " => it is not!\n";
 
 		my_rational cost = redcost(j);
 		costs.push_back(cost);
@@ -354,6 +393,20 @@ my_rational Simplex::redcost(const unsigned& j)
 	}
 	cost = d + cost;
 	return cost;
+}
+
+bool Simplex::is_basic(const unsigned& j)
+{
+	ldbg << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column?";
+	for (unsigned k = 0; k < basis.size(); k++) {
+		// ldbg << "basis[" << k << "] = " << basis[k] << "\n";
+		if (basis[k] == (j+basis.size()+1)) {
+			ldbg << " => it is!\n";
+			return true;
+		}
+	}
+	ldbg << " => it is not!\n";
+	return false;
 }
 
 void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
@@ -477,4 +530,19 @@ void Simplex::variables()
 		lout << lp.variables.elements[basis[i]-CARRY[0].size()] << "\t\t\t" << CARRY[i+1][0] << " (" << (my_float)CARRY[i+1][0] << ")\n";
 	}
 	lout << "All other variables are 0.\n";
+}
+
+void Simplex::full_tableau()
+{
+	// Calculate the whole tableau (just for debugging)
+	vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
+	TABLEAU.clear();
+	TABLEAU = CARRY;
+	for (unsigned j = 0; j < n; j++)
+	{
+		my_rational cost = redcost(j);
+		generate_col(CARRY[0].size()+j, cost);
+		Matrix::append_vec(TABLEAU, TABLEAU, X_s);
+	}
+	ldbg.matrix(TABLEAU, "TABLEAU");
 }

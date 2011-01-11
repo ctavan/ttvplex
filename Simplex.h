@@ -63,6 +63,15 @@ class Simplex {
 	\sa
 **/
 		void generate_col(const unsigned& s, const my_rational& cost_s);
+/** \brief Checks if the column j is a basic column
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-11
+	\param unsigned Column index
+	\return true or false
+	\sa
+**/
+		bool is_basic(const unsigned& j);
 /** \brief Chooses a suitable pivot element
 	
 		Chooses a suitable pivot row and writes the result into the variable r.
@@ -76,6 +85,14 @@ class Simplex {
 	\sa
 **/
 		void choose_pivot(unsigned& r, const vector<my_rational>& col);
+/** \brief Generates and prints the current full tableau
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-11
+	\return void
+	\sa
+**/
+		void full_tableau();
 
 	public:
 		Simplex(LPParser &l) : phase(1), lp(l), optimal(false), infeasible(false) {};
