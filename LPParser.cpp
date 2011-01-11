@@ -202,6 +202,11 @@ void LPParser::read()
 						{
 							constr.rhs = -1;
 						}
+						// In case righthand side starts with a plus, set the coefficient
+						else if (parts[i] == "+")
+						{
+							constr.rhs = +1;
+						}
 						// Here we finally have the value of the RHS
 						else
 						{
@@ -380,6 +385,14 @@ void LPParser::collect_variables()
 void LPParser::standardize()
 {
 	linf << "LPParser: Bringing the LP to standard form\n";
+	// Transform MAX to MIN
+	if (objective.direction == LPObjective::OBJ_MAX)
+	{
+		for (unsigned i = 0; i < objective.elements.size(); i++)
+		{
+			objective.elements[i].coeff *= -1;
+		}
+	}
 	boundconstraints();
 	slacksurplus();
 	positive_rhs();

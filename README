@@ -3,6 +3,5 @@ Revised Simplex implementation
 
 NOTES
 =====
- * Partial pricing could be implemented
  * We implemented Blands anti-cycling rule since it is easy to implement. Implementing the lexicographic anti-cycling rule might be more efficient.
  * There might be problems, if the upper bound of a variable is negative... Then one should substitute y = -x.

@@ -91,164 +91,6 @@ void Simplex::init()
 	}
 	ldbg.matrix(CARRY, "CARRY");
 
-	// // Index set for basis columns
-	// basis.clear();
-	// basis.push_back(1);
-	// basis.push_back(2);
-	// basis.push_back(3);
-	// 
-	// // Righthand side
-	// b.clear();
-	// b.push_back(1);
-	// b.push_back(3);
-	// b.push_back(4);
-	// ldbg.vec(b, "b");
-	// 
-	// // Matrix A
-	// A.clear();
-	// A.push_back(vector<my_rational>());
-	// A.push_back(vector<my_rational>());
-	// A.push_back(vector<my_rational>());
-	// A[0].push_back(3);
-	// A[0].push_back(2);
-	// A[0].push_back(1);
-	// A[0].push_back(0);
-	// A[0].push_back(0);
-	// 
-	// A[1].push_back(5);
-	// A[1].push_back(1);
-	// A[1].push_back(1);
-	// A[1].push_back(1);
-	// A[1].push_back(0);
-	// 
-	// A[2].push_back(2);
-	// A[2].push_back(5);
-	// A[2].push_back(1);
-	// A[2].push_back(0);
-	// A[2].push_back(1);
-	// ldbg.matrix(A, "A");
-	// 
-	// // Cost coefficients c
-	// c.clear();
-	// c.push_back(1);
-	// c.push_back(1);
-	// c.push_back(1);
-	// c.push_back(1);
-	// c.push_back(1);
-	// ldbg.vec(c, "c");
-	// 
-	// 
-	// // // Carry Matrix
-	// // CARRY.clear();
-	// // CARRY.push_back(vector<my_rational>());
-	// // CARRY.push_back(vector<my_rational>());
-	// // CARRY.push_back(vector<my_rational>());
-	// // CARRY.push_back(vector<my_rational>());
-	// // CARRY.push_back(vector<my_rational>());
-	// // 
-	// // int i = 0;
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // 
-	// // i++;
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // 
-	// // i++;
-	// // CARRY[i].push_back(b[0]);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(3);
-	// // CARRY[i].push_back(2);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // 
-	// // i++;
-	// // CARRY[i].push_back(b[1]);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(5);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(0);
-	// // 
-	// // i++;
-	// // CARRY[i].push_back(b[2]);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(2);
-	// // CARRY[i].push_back(5);
-	// // CARRY[i].push_back(1);
-	// // CARRY[i].push_back(0);
-	// // CARRY[i].push_back(1);
-	// // ldbg.matrix(CARRY, "CARRY");
-	// // 
-	// // Matrix::row_subtract(CARRY, 1, 2);
-	// // Matrix::row_subtract(CARRY, 1, 3);
-	// // Matrix::row_subtract(CARRY, 1, 4);
-	// // ldbg.matrix(CARRY, "CARRY");
-	// // Matrix::pivot(CARRY, CARRY, 2, 4);
-	// // ldbg.matrix(CARRY, "CARRY");
-	// // Matrix::pivot(CARRY, CARRY, 2, 5);
-	// // ldbg.matrix(CARRY, "CARRY");
-	// // Matrix::pivot(CARRY, CARRY, 3, 7);
-	// // ldbg.matrix(CARRY, "CARRY");
-	// // Matrix::pivot(CARRY, CARRY, 4, 8);
-	// // ldbg.matrix(CARRY, "CARRY");
-	// // ldbg.message("=================");
-	// 
-	// // Carry-Matrix
-	// CARRY.clear();
-	// CARRY.push_back(vector<my_rational>());
-	// CARRY.push_back(vector<my_rational>());
-	// CARRY.push_back(vector<my_rational>());
-	// CARRY.push_back(vector<my_rational>());
-	// 
-	// int i = 0;
-	// CARRY[i].push_back(-b[0]-b[1]-b[2]);
-	// CARRY[i].push_back(0);
-	// CARRY[i].push_back(0);
-	// CARRY[i].push_back(0);
-	// 
-	// i++;
-	// CARRY[i].push_back(b[0]);
-	// CARRY[i].push_back(1);
-	// CARRY[i].push_back(0);
-	// CARRY[i].push_back(0);
-	// 
-	// i++;
-	// CARRY[i].push_back(b[1]);
-	// CARRY[i].push_back(0);
-	// CARRY[i].push_back(1);
-	// CARRY[i].push_back(0);
-	// 
-	// i++;
-	// CARRY[i].push_back(b[2]);
-	// CARRY[i].push_back(0);
-	// CARRY[i].push_back(0);
-	// CARRY[i].push_back(1);
-	// linf.matrix(CARRY, "CARRY");
-	// exit(0);
-
 	// Size of the problem. The real tableau would have size (m+1) x (n+1).
 	// The carry-matrix has size (m+1) x (m+1)
 	// The coefficient-matrix has size m x n
@@ -273,10 +115,36 @@ void Simplex::optimize()
 	// Repeat simplex algorithm until an optimal solution is found
 	while (optimal == false)
 	{
+		ldbg << "=============== Iteration " << counter << " / " << max_iterations << " ===============\n";
 
 		// In the beginning of each cycle we set optimal = false. If we get optimal in this cycle
 		// this variable will be set to true by the pricing routine.
 		optimal = false;
+
+		vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
+		TABLEAU = CARRY;
+		for (unsigned j = 0; j < n; j++)
+		{
+			my_rational cost = 0;
+			for (unsigned k = 1; k < (m+1); k++) {
+				cost += CARRY[0][k]*A[k-1][j];
+				// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+			}
+			ldbg << "Cost c = " << cost << "\n";
+
+			my_rational d = 0;
+			if (phase == 1)
+			{
+				for (unsigned k = 0; k < m; k++) {
+					d -= A[k][j];
+				}
+				ldbg << "d = " << d << "\n";
+				cost = d + cost;
+			}
+			generate_col(j, cost);
+			Matrix::append_vec(TABLEAU, TABLEAU, X_s);
+		}
+		ldbg.matrix(TABLEAU, "TABLEAU");
 
 		// Pricing
 		pricing(cost_s, s);	// Index of the column that will enter the basis wrt. the matrix A
@@ -316,7 +184,8 @@ void Simplex::optimize()
 		// so r = 0 means the first row that doesn't hold costs
 		choose_pivot(r);
 
-		linf << "Pivot element determined: r,s = " << r << "," << s << "\n";
+		linf << "=====> Let column " << basis[r] << " leave the basis and column " << (CARRY[0].size()+s) << " enter.\n";
+		linf << "Pivot element determined: r,s = " << r << "," << s << " (" << (r+1) << "," << (s+1) << ")\n";
 
 		vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
 		Matrix::append_vec(CARRY_X_s, CARRY, X_s);	// and append the newly generated column
@@ -358,24 +227,26 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 	for (unsigned j = 0; j < n; j++) {
 		bool is_basic = false;
 
+		ldbg << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column?";
 		for (unsigned k = 0; k < basis.size(); k++) {
-			ldbg << "Checking if column j = " << (j+basis.size()+1) << " already is a basic column. basis[" << k << "] = " << basis[k] << "\n";
+			// ldbg << "basis[" << k << "] = " << basis[k] << "\n";
 			if (basis[k] == (j+basis.size()+1)) {
-				ldbg << "Column " << (j+basis.size()+1) << "is already in the basis" << "\n";
 				is_basic = true;
 				break;
 			}
 		}
 		if (is_basic == true) {
+			ldbg << " => it is already in the basis! Skipping.\n";
 			costs.push_back(1); // Set positive fake cost to fill up the costs-vector
 			continue;
 		}
+		ldbg << " => it is not!\n";
 
 		// pi^T A_j
 		my_rational cost = 0;
 		for (unsigned k = 1; k < (m+1); k++) {
 			cost += CARRY[0][k]*A[k-1][j];
-			ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+			// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
 		}
 		ldbg << "Cost c = " << cost << "\n";
 
@@ -399,6 +270,7 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 
 		// If the first negative cost that is found, just use it because we want
 		// to prevent cycling using Blands rule.
+		// @see e.g. Papadimitriou/Steiglitz p. 53
 		if (cost < 0)
 		{
 			s = j;
@@ -442,7 +314,7 @@ void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
 	for (unsigned i = 1; i < (m+1); i++) { // loop through rows
 		my_rational row_sum = 0;
 		for (unsigned j = 1; j < (m+1); j++) {
-			ldbg << "Indices: " << i << "," << j << "," << s << "\n";
+			// ldbg << "Indices: " << i << "," << j << "," << s << "\n";
 			row_sum += CARRY[i][j]*A[j-1][s];
 		}
 		X_s.push_back(row_sum);
@@ -460,8 +332,6 @@ void Simplex::choose_pivot(unsigned& r)
 	thetas.clear();
 
 	my_rational theta_min = -1;		// Theta_0: Primal step length = min { Theta_i > 0 }
-
-	r = 0;							// Reset row to be chosen
 
 	// Loop through all rows
 	for (unsigned i = 1; i < (m+1); i++)
@@ -490,14 +360,16 @@ void Simplex::choose_pivot(unsigned& r)
 	// Smallest theta should be positive
 	if (theta_min < 0)
 	{
-		lerr << "ERROR: cost seems to be unbounded" << "\n";
+		lout << "WARNING: objective seems to be unbounded. Stopping here!" << "\n";
 		exit(EXIT_SUCCESS);
 	}
 	ldbg << "Thetas for pivot element selection:\n";
 	ldbg.vec(thetas, "thetas");
-	// Now select the pivot element according to blands rule
+	// Now select the pivot element according to Blands rule
 	// In case only one theta has attained the minimum value theta_min, we choose this row
 	// In case of tie, choose the lowest numbered column basis[i] to leave the basis
+	int temp = -1;	// Temporary variable to decide, which row corresponds to the column with smalles index
+	int rtemp = -1;	
 	for (unsigned i = 0; i < thetas.size(); i++)
 	{
 		// Only consider thetas with the same minimum value
@@ -505,14 +377,23 @@ void Simplex::choose_pivot(unsigned& r)
 		{
 			continue;
 		}
-		ldbg << "Minimum theta[" << i << "] = " << theta_min << " found! Corresponds to basic column " << basis[i] << ". Current value of r = " << r << "\n";
-		if (r == 0 || basis[i] < r)
+		ldbg << "Minimum theta[" << i << "] = " << theta_min << " found! Corresponds to basic column basis[" << i << "] = " << basis[i] << ". Current value of r = " << rtemp << "\n";
+		// (basis[i]-CARRY[0].size()) is the column index of the column corresponding to the i'th basic variable
+		// with respect to the original coefficient matrix A
+		if (temp < 0 || (temp >= 0 && basis[i] < (unsigned)temp))
 		{
-			r = i;
-			ldbg << "Chose r = " << r << " according to blands rule.\n";
+			temp = basis[i];
+			rtemp = i;
+			ldbg << "Chose r = " << rtemp << " according to blands rule (temp = " << temp << ").\n";
 		}
 	}
-	linf << "r = " << r << " seems to be a suitable pivot element." << "\n";
+	if (rtemp < 0)
+	{
+		lerr << "ERROR: Unable to find a suitable pivoting-row according to blands rule.\n";
+		exit(EXIT_FAILURE);
+	}
+	r = (unsigned)rtemp;
+	linf << "r = " << r << " seems to be a suitable pivot element\n";
 }
 
 void Simplex::objective()
