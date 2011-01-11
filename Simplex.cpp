@@ -199,7 +199,7 @@ void Simplex::optimize()
 
 		// Update the basis: Basis values count with respect to the whole tableau!
 		basis[r] = CARRY[0].size()+s;
-		linf.vec(basis, "basis");
+		ldbg.vec(basis, "basis");
 
 		// Update carry matrix
 		for (unsigned i = 0; i < CARRY.size(); i++) {
@@ -223,6 +223,19 @@ void Simplex::phase2()
 void Simplex::pricing(my_rational& cost_s, unsigned& s)
 {
 	s = 0;
+
+	// First of all check through the reduced costs, that are present in the CARRY-matrix!
+	// for (unsigned j = 1; j < CARRY[0].size(); j++)
+	// {
+	// 	ldbg << "Cost in CARRY: CARRY[0][" << i << "] = " << CARRY[0][i] << "\n";
+	// 	if (CARRY[0][i] < 0)
+	// 	{
+	// 		cost_s = CARRY[0][i];
+	// 		s = i;
+	// 		return;
+	// 	}
+	// }
+
 	vector<my_rational> costs;
 	for (unsigned j = 0; j < n; j++) {
 		bool is_basic = false;
@@ -319,8 +332,8 @@ void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
 		}
 		X_s.push_back(row_sum);
 	}
-	linf << "Generated column:\n";
-	linf.vec(X_s, "X_s");
+	ldbg << "Generated column:\n";
+	ldbg.vec(X_s, "X_s");
 }
 
 void Simplex::choose_pivot(unsigned& r)

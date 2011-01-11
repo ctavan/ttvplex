@@ -592,7 +592,10 @@ string LPParser::trim(string line, const bool& strip_spaces)
 	size_t k;
 	n = line.find_first_not_of(" ");
 	k = line.find_last_not_of(" ");
-	line = line.substr(n, k-n+1); //keep n-k+1 chars
+	if (n != string::npos && k != string::npos)
+	{
+		line = line.substr(n, k-n+1); //keep n-k+1 chars
+	}
 
 	// Transform everything to lowercase
 	transform(line.begin(), line.end(), line.begin(), ::tolower);
