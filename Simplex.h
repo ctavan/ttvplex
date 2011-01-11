@@ -64,7 +64,7 @@ class Simplex {
 		void choose_pivot(unsigned& r);
 
 	public:
-		Simplex();
+		Simplex(LPParser &l) : phase(1), lp(l), optimal(false) {};
 
 /** \brief Initialize the tableaus
 	
@@ -75,13 +75,15 @@ class Simplex {
 	\return void
 	\sa
 **/
-		void init(LPParser& lp);
+		void init();
 
 
 		void optimize();
 		void objective();
+		void variables();
 		void phase2();
 
+		LPParser& lp;	//!< Reference to the lp object
 		unsigned m; //!< Number of rows of the initial matrix
 		unsigned n; //!< Number of columns of the initial matrix
 		bool optimal;	//!< Whether we're optimal or not. Used to stop the simplex iterations

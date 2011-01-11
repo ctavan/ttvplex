@@ -3,12 +3,11 @@
 using namespace std;
 
 // Constructor
-Simplex::Simplex() {
-	optimal = false;
-	phase = 1;
-}
+// Simplex::Simplex() {
+// 
+// }
 
-void Simplex::init(LPParser& lp)
+void Simplex::init()
 {
 	ldbg << "Filling vector b with righthandsides from the constraints.\n";
 	b.clear();
@@ -524,4 +523,13 @@ void Simplex::objective()
 		obj += CARRY[i+1][0]*c[basis[i]-CARRY[0].size()];
 	}
 	lout << "Objective: " << obj << " = (" << (mpf_class)obj << ")\n";
+}
+void Simplex::variables()
+{
+	lout << "Variable name\t\t" << "Solution value\n";
+	for (unsigned i = 0; i < basis.size(); i++)
+	{
+		lout << lp.variables.elements[basis[i]-CARRY[0].size()] << "\t\t\t" << CARRY[i+1][0] << " (" << (mpf_class)CARRY[i+1][0] << ")\n";
+	}
+	lout << "All other variables are 0.\n";
 }
