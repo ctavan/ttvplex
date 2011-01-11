@@ -121,30 +121,31 @@ void Simplex::optimize()
 		// this variable will be set to true by the pricing routine.
 		optimal = false;
 
-		// vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
-		// TABLEAU = CARRY;
-		// for (unsigned j = 0; j < n; j++)
-		// {
-		// 	my_rational cost = 0;
-		// 	for (unsigned k = 1; k < (m+1); k++) {
-		// 		cost += CARRY[0][k]*A[k-1][j];
-		// 		// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
-		// 	}
-		// 	ldbg << "Cost c = " << cost << "\n";
-		// 
-		// 	my_rational d = 0;
-		// 	if (phase == 1)
-		// 	{
-		// 		for (unsigned k = 0; k < m; k++) {
-		// 			d -= A[k][j];
-		// 		}
-		// 		ldbg << "d = " << d << "\n";
-		// 		cost = d + cost;
-		// 	}
-		// 	generate_col(j, cost);
-		// 	Matrix::append_vec(TABLEAU, TABLEAU, X_s);
-		// }
-		// ldbg.matrix(TABLEAU, "TABLEAU");
+		vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
+		TABLEAU.clear();
+		TABLEAU = CARRY;
+		for (unsigned j = 0; j < n; j++)
+		{
+			my_rational cost = 0;
+			for (unsigned k = 1; k < (m+1); k++) {
+				cost += CARRY[0][k]*A[k-1][j];
+				// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+			}
+			ldbg << "Cost c = " << cost << "\n";
+		
+			my_rational d = 0;
+			if (phase == 1)
+			{
+				for (unsigned k = 0; k < m; k++) {
+					d -= A[k][j];
+				}
+				ldbg << "d = " << d << "\n";
+				cost = d + cost;
+			}
+			generate_col(CARRY[0].size()+j, cost);
+			Matrix::append_vec(TABLEAU, TABLEAU, X_s);
+		}
+		ldbg.matrix(TABLEAU, "TABLEAU");
 
 		// Pricing
 		pricing(cost_s, s);	// Index of the column that will enter the basis wrt. the matrix A
