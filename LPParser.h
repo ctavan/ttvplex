@@ -29,7 +29,7 @@ using namespace std;
 struct LPVariable
 {
 	string name;		//!< Variable name
-	mpq_class coeff;	//!< Coefficient in front of the variable
+	my_rational coeff;	//!< Coefficient in front of the variable
 
 	LPVariable() : name(""), coeff(1) {}
 
@@ -40,16 +40,16 @@ struct LPVariable
 	\return void
 	\sa
 **/
-	void dump(const bool& detailed = false)
+	void dump(Log& out, const bool& detailed = false)
 	{
 		if (detailed)
 		{
-			linf << "\tCoeff:\t" << coeff << "\n";
-			linf << "\tName:\t" << name << "\n";
+			out << "\tCoeff:\t" << coeff << "\n";
+			out << "\tName:\t" << name << "\n";
 		}
 		else
 		{
-			linf << "+ " << coeff << " " << name << " ";
+			out << "+ " << coeff << " " << name << " ";
 		}
 	}
 };
@@ -73,7 +73,7 @@ struct LPObjective
 	int direction;					//!< Whether to maximize or minimize the objective. Default: MINIMIZE
 	string name;					//!< Optional name of the Objective. Default: "obj"
 	vector<LPVariable> elements;	//!< Coefficient-variable pairs of the objective.
-	mpq_class offset;				//!< Offset to the objective that may come from substituting variables with nonzero lower bound
+	my_rational offset;				//!< Offset to the objective that may come from substituting variables with nonzero lower bound
 
 	static const int OBJ_MIN = 0;	//!< Constant designating MINIMIZE
 	static const int OBJ_MAX = 1;	//!< Constant designating MAXIMIZE
@@ -96,28 +96,28 @@ struct LPObjective
 	\return void
 	\sa
 **/
-	void dump(const bool& detailed = false)
+	void dump(Log& out, const bool& detailed = false)
 	{
 		if (detailed)
 		{
-			linf << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
-			linf << "Name:\t\t" << name << "\n";
-			linf << "Offset:\t\t" << offset << "\n";
-			linf << "Elements:\n";
+			out << "Direction:\t" << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
+			out << "Name:\t\t" << name << "\n";
+			out << "Offset:\t\t" << offset << "\n";
+			out << "Elements:\n";
 			for (unsigned i = 0; i < elements.size(); i++)
 			{
-				elements[i].dump(detailed);
+				elements[i].dump(out, detailed);
 			}
 		}
 		else
 		{
-			linf << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
-			linf << name << ": ";
+			out << (direction == OBJ_MAX ? "MAX" : "MIN") << "\n";
+			out << name << ": ";
 			for (unsigned i = 0; i < elements.size(); i++)
 			{
-				elements[i].dump(detailed);
+				elements[i].dump(out, detailed);
 			}
-			linf << " + " << offset << "\n";
+			out << " + " << offset << "\n";
 		}
 	}
 };
@@ -145,7 +145,7 @@ struct LPConstraint
 {
 	int relation;					//!< Relation: -1 for <, 0 for =, 1 for >
 	string name;					//!< Name of the constraint
-	mpq_class rhs;					//!< Right hand side
+	my_rational rhs;					//!< Right hand side
 	vector<LPVariable> elements;	//!< Variables that are being used in the constraint
 
 	static const int REL_LE = -1;	//!< Constant for "less than or equal"-relations
@@ -171,27 +171,27 @@ struct LPConstraint
 	\return void
 	\sa
 **/
-	void dump(const bool& detailed = false)
+	void dump(Log& out, const bool& detailed = false)
 	{
 		if (detailed)
 		{
-			linf << "Name:\t\t" << name << "\n";
-			linf << "Elements:\n";
+			out << "Name:\t\t" << name << "\n";
+			out << "Elements:\n";
 			for (unsigned i = 0; i < elements.size(); i++)
 			{
-				elements[i].dump(detailed);
+				elements[i].dump(out, detailed);
 			}
-			linf << "Relation:\t" << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << "\n";
-			linf << "RHS:\t\t" << rhs << "\n";
+			out << "Relation:\t" << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << "\n";
+			out << "RHS:\t\t" << rhs << "\n";
 		}
 		else
 		{
-			linf << name << ": ";
+			out << name << ": ";
 			for (unsigned i = 0; i < elements.size(); i++)
 			{
-				elements[i].dump(detailed);
+				elements[i].dump(out, detailed);
 			}
-			linf << " " << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << " " << rhs << "\n";
+			out << " " << (relation == REL_LE ? "<" : (relation == REL_GE ? ">" : "=")) << " " << rhs << "\n";
 		}
 	}
 };
@@ -215,8 +215,8 @@ struct LPConstraint
 struct LPBound
 {
 	string name;				//!< Name of the variable
-	mpq_class lower;			//!< Lower bound
-	mpq_class upper;			//!< Upper bound
+	my_rational lower;			//!< Lower bound
+	my_rational upper;			//!< Upper bound
 	bool lower_unbound;			//!< Whether the variable is unbounded from below
 	bool upper_unbound;			//!< Whether the variable is unbounded from above
 /** \brief Constructor
@@ -242,13 +242,13 @@ struct LPBound
 	\return void
 	\sa
 **/
-	void dump(const bool& detailed = false)
+	void dump(Log& out, const bool& detailed = false)
 	{
 		if (detailed)
 		{
-			linf << "Name:\t\t" << name << "\n";
-			linf << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
-			linf << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
+			out << "Name:\t\t" << name << "\n";
+			out << "Lower:\t\t" << lower << " (" << (lower_unbound ? "unbounded" : "") << ")\n";
+			out << "Upper:\t\t" << upper << " (" << (upper_unbound ? "unbounded" : "") << ")\n";
 		}
 		else
 		{
@@ -256,7 +256,7 @@ struct LPBound
 			low << lower;
 			stringstream up;
 			up << upper;
-			linf << (lower_unbound ? "-INF" : low.str()) << " <= " << name << " <= " << (upper_unbound ? "+INF" : up.str()) << "\n";
+			out << (lower_unbound ? "-INF" : low.str()) << " <= " << name << " <= " << (upper_unbound ? "+INF" : up.str()) << "\n";
 		}
 	}
 };
@@ -418,11 +418,11 @@ struct LPVarlist
 	\return void
 	\sa
 **/
-	void dump()
+	void dump(Log& out)
 	{
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
-			linf << elements[i] << "\n";
+			out << elements[i] << "\n";
 		}
 	}
 };
@@ -624,31 +624,39 @@ class LPParser
 /** \brief Print out the LP
 	
 	\author Christoph Tavan TU Berlin
+	\param ostream& Outputstream to dump to
+	\param bool Detailed- or readable output
 	\date 2011-01-09
 	\sa
 **/
-		void dump(const bool& detailed = false);
+		void dump(Log& out, const bool& detailed = false);
 /** \brief Print out the Objective
 	
 	\author Christoph Tavan TU Berlin
+	\param ostream& Outputstream to dump to
+	\param bool Detailed- or readable output
 	\date 2011-01-09
 	\sa
 **/
-		void dump_objective(const bool& detailed = false);
+		void dump_objective(Log& out, const bool& detailed = false);
 /** \brief Print out the Constraints
 	
 	\author Christoph Tavan TU Berlin
+	\param ostream& Outputstream to dump to
+	\param bool Detailed- or readable output
 	\date 2011-01-09
 	\sa
 **/
-		void dump_constraints(const bool& detailed = false);
+		void dump_constraints(Log& out, const bool& detailed = false);
 /** \brief Print out the Bounds
 	
 	\author Christoph Tavan TU Berlin
+	\param ostream& Outputstream to dump to
+	\param bool Detailed- or readable output
 	\date 2011-01-09
 	\sa
 **/
-		void dump_bounds(const bool& detailed = false);
+		void dump_bounds(Log& out, const bool& detailed = false);
 };
 
 #endif

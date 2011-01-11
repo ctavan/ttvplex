@@ -8,13 +8,12 @@
 #include <vector>
 #include <string>
 
-// GMP: The GNU Multiple Precision Arithmetic Library
-#include <gmpxx.h>
+// Include the multiprecision library
+#include "numbers.h"
 
 // Local includes
 #include "Log.h"
 #include "Matrix.h"
-
 
 // Global variables for logging/output
 extern Log lout;	//!< Standard output of the program (not controlled by verbosity), shown if verbosity >= 1 (default)

@@ -7,24 +7,24 @@ Matrix::Matrix()
 {
 }
 
-mpq_class Matrix::det(vector< vector< mpq_class > > A)
+my_rational Matrix::det(vector< vector< my_rational > > A)
 {
-	return (mpq_class)0;
+	return (my_rational)0;
 }
 
-void Matrix::transpose(vector< vector< mpq_class > > A, vector< vector< mpq_class > > At)
-{
-}
-
-void Matrix::multiply(vector< vector< mpq_class > > A, vector< vector< mpq_class > > B, vector< vector< mpq_class > > R)
+void Matrix::transpose(vector< vector< my_rational > > A, vector< vector< my_rational > > At)
 {
 }
 
-void Matrix::inverse(vector< vector< mpq_class > > A, vector< vector< mpq_class > > Ai)
+void Matrix::multiply(vector< vector< my_rational > > A, vector< vector< my_rational > > B, vector< vector< my_rational > > R)
 {
 }
 
-void Matrix::pivot(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const int& i, const int& j)
+void Matrix::inverse(vector< vector< my_rational > > A, vector< vector< my_rational > > Ai)
+{
+}
+
+void Matrix::pivot(vector< vector< my_rational > >& B, const vector< vector< my_rational > >& A, const int& i, const int& j)
 {
 	ldbg << "Pivoting on element: [" << i << "][" << j << "]\n";
 
@@ -44,7 +44,7 @@ void Matrix::pivot(vector< vector< mpq_class > >& B, const vector< vector< mpq_c
 	}
 }
 
-void Matrix::row_subtract(vector< vector< mpq_class > >& A, const int& i, const int& j)
+void Matrix::row_subtract(vector< vector< my_rational > >& A, const int& i, const int& j)
 {
 	ldbg << "Subtracting: row[" << i << "] - row[" << j << "]\n";
 
@@ -54,7 +54,7 @@ void Matrix::row_subtract(vector< vector< mpq_class > >& A, const int& i, const 
 }
 
 // B = A|x
-void Matrix::append_vec(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const vector< mpq_class >& x)
+void Matrix::append_vec(vector< vector< my_rational > >& B, const vector< vector< my_rational > >& A, const vector< my_rational >& x)
 {
 	// Copy contents of matrix A into matrix B
 	B = A;

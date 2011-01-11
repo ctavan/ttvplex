@@ -6,6 +6,11 @@ int main(int argc, char** argv)
 {
 	// Some variables that will be filled with values given through the commandline
 	string input;	// Inputfilename
+	bool display_problem = false;	// Whether to display problem again
+	bool display_objective = false;	// Whether to display objective
+	bool display_variables = false;	// Whether to display variables
+	bool optimize = false;	// Whether to optimize
+
 	// Handle commandline arguments using the nice TCLAP library
 	// @see http://tclap.sourceforge.net/
 	//
@@ -34,6 +39,17 @@ int main(int argc, char** argv)
 		TCLAP::ValueArg<string> inputArg("i","input","Input LP file", true, "", "string");
 		cmd.add( inputArg );
 
+		TCLAP::SwitchArg display_problemArg("p","problem","Display problem?", false);
+		cmd.add( display_problemArg );
+
+		TCLAP::SwitchArg display_objectiveArg("o","objective","Display objective?", false);
+		cmd.add( display_objectiveArg );
+
+		TCLAP::SwitchArg display_variablesArg("w","variables","Display variables?", false);
+		cmd.add( display_variablesArg );
+
+		TCLAP::SwitchArg optimizeArg("x","optimize","Execute optimization?", false);
+		cmd.add( optimizeArg );
 
 		// Parse the argv array.
 		cmd.parse( argc, argv );
@@ -57,22 +73,52 @@ int main(int argc, char** argv)
 		}
 
 		input = inputArg.getValue();
+
+		display_problem = display_problemArg.getValue();
+		display_objective = display_objectiveArg.getValue();
+		display_variables = display_variablesArg.getValue();
+
+		optimize = optimizeArg.getValue();
 	}
 	catch (TCLAP::ArgException &e)  // catch any exceptions
 	{
 		cerr << "error: " << e.error() << " for arg " << e.argId() << endl; 
+		exit(EXIT_FAILURE);
 	}
 
 
 	LPParser lp(input);
 	lp.read();
+	if (display_problem)
+	{
+		lout << "===================================================\n";
+		lout << "LP read from file: '" << input << "'\n";
+		lp.dump(lout);
+		lout << "\n";
+	}
 	lp.standardize();
+	if (display_problem)
+	{
+		lout << "===================================================\n";
+		lout << "LP now in standard form:\n";
+		lp.dump(lout);
+		lout << "\n";
+	}
 
 	Simplex smp(lp);
 	smp.init();
-	smp.optimize();
-	smp.objective();
-	smp.variables();
+	if (optimize)
+	{
+		smp.optimize();
+	}
+	if (display_objective)
+	{
+		smp.objective();
+	}
+	if (display_variables)
+	{
+		smp.variables();
+	}
 
 	exit(EXIT_SUCCESS);
 

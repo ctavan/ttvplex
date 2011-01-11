@@ -22,12 +22,12 @@ void Simplex::init()
 	for (unsigned i = 0; i < lp.constraints.size(); i++)
 	{
 		// Create a new row for each constraint
-		A.push_back(vector<mpq_class>());
+		A.push_back(vector<my_rational>());
 		// Loop through all variables, that are in the system
 		for (unsigned j = 0; j < lp.variables.elements.size(); j++)
 		{
 			// For each variable, check if it is used in the current constraint
-			mpq_class val = 0;
+			my_rational val = 0;
 			for (unsigned k = 0; k < lp.constraints[i].elements.size(); k++)
 			{
 				if (lp.constraints[i].elements[k].name == lp.variables.elements[j])
@@ -47,7 +47,7 @@ void Simplex::init()
 	// Loop through all variables, that are in the system
 	for (unsigned j = 0; j < lp.variables.elements.size(); j++)
 	{
-		mpq_class val = 0;
+		my_rational val = 0;
 		for (unsigned i = 0; i < lp.objective.elements.size(); i++)
 		{
 			if (lp.variables.elements[j] == lp.objective.elements[i].name)
@@ -63,7 +63,7 @@ void Simplex::init()
 	ldbg << "Setting up CARRY-Matrix.\n";
 	CARRY.clear();
 	// First line of carry-matrix: reduced costs
-	CARRY.push_back(vector<mpq_class>());
+	CARRY.push_back(vector<my_rational>());
 	CARRY[0].push_back(0);
 	// Index set for basis columns
 	basis.clear();
@@ -75,7 +75,7 @@ void Simplex::init()
 	}
 	for (unsigned i = 1; i <= b.size(); i++)
 	{
-		CARRY.push_back(vector<mpq_class>());
+		CARRY.push_back(vector<my_rational>());
 		CARRY[i].push_back(b[i-1]);
 		for (unsigned j = 1; j <= b.size(); j++)
 		{
@@ -106,9 +106,9 @@ void Simplex::init()
 	// 
 	// // Matrix A
 	// A.clear();
-	// A.push_back(vector<mpq_class>());
-	// A.push_back(vector<mpq_class>());
-	// A.push_back(vector<mpq_class>());
+	// A.push_back(vector<my_rational>());
+	// A.push_back(vector<my_rational>());
+	// A.push_back(vector<my_rational>());
 	// A[0].push_back(3);
 	// A[0].push_back(2);
 	// A[0].push_back(1);
@@ -140,11 +140,11 @@ void Simplex::init()
 	// 
 	// // // Carry Matrix
 	// // CARRY.clear();
-	// // CARRY.push_back(vector<mpq_class>());
-	// // CARRY.push_back(vector<mpq_class>());
-	// // CARRY.push_back(vector<mpq_class>());
-	// // CARRY.push_back(vector<mpq_class>());
-	// // CARRY.push_back(vector<mpq_class>());
+	// // CARRY.push_back(vector<my_rational>());
+	// // CARRY.push_back(vector<my_rational>());
+	// // CARRY.push_back(vector<my_rational>());
+	// // CARRY.push_back(vector<my_rational>());
+	// // CARRY.push_back(vector<my_rational>());
 	// // 
 	// // int i = 0;
 	// // CARRY[i].push_back(0);
@@ -218,10 +218,10 @@ void Simplex::init()
 	// 
 	// // Carry-Matrix
 	// CARRY.clear();
-	// CARRY.push_back(vector<mpq_class>());
-	// CARRY.push_back(vector<mpq_class>());
-	// CARRY.push_back(vector<mpq_class>());
-	// CARRY.push_back(vector<mpq_class>());
+	// CARRY.push_back(vector<my_rational>());
+	// CARRY.push_back(vector<my_rational>());
+	// CARRY.push_back(vector<my_rational>());
+	// CARRY.push_back(vector<my_rational>());
 	// 
 	// int i = 0;
 	// CARRY[i].push_back(-b[0]-b[1]-b[2]);
@@ -255,7 +255,7 @@ void Simplex::init()
 	// There are n cost-coefficients
 	m = A.size();		// Rows of the problem
 	n = A[0].size();	// Columns of the problem
-	lout << "Dimension of the coefficient matrix A: " << m << " x " << n;
+	lout << "Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
 }
 
 void Simplex::optimize()
@@ -267,7 +267,7 @@ void Simplex::optimize()
 	phase = 1;
 
 	unsigned s;							// Column-index of the column that will enter the basis
-	mpq_class cost_s;					// Reduced cost of the column that will enter the basis
+	my_rational cost_s;					// Reduced cost of the column that will enter the basis
 	unsigned r;							// Row-index of the pivot-element
 
 	// Repeat simplex algorithm until an optimal solution is found
@@ -318,7 +318,7 @@ void Simplex::optimize()
 
 		linf << "Pivot element determined: r,s = " << r << "," << s << "\n";
 
-		vector< vector<mpq_class> > CARRY_X_s;		// Make a copy of the carry matrix
+		vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
 		Matrix::append_vec(CARRY_X_s, CARRY, X_s);	// and append the newly generated column
 
 		// Perform Pivot
@@ -351,10 +351,10 @@ void Simplex::phase2()
 {
 }
 
-void Simplex::pricing(mpq_class& cost_s, unsigned& s)
+void Simplex::pricing(my_rational& cost_s, unsigned& s)
 {
 	s = 0;
-	vector<mpq_class> costs;
+	vector<my_rational> costs;
 	for (unsigned j = 0; j < n; j++) {
 		bool is_basic = false;
 
@@ -372,14 +372,14 @@ void Simplex::pricing(mpq_class& cost_s, unsigned& s)
 		}
 
 		// pi^T A_j
-		mpq_class cost = 0;
+		my_rational cost = 0;
 		for (unsigned k = 1; k < (m+1); k++) {
 			cost += CARRY[0][k]*A[k-1][j];
 			ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
 		}
 		ldbg << "Cost c = " << cost << "\n";
 
-		mpq_class d = 0;
+		my_rational d = 0;
 		if (phase == 1)
 		{
 			for (unsigned k = 0; k < m; k++) {
@@ -415,7 +415,7 @@ void Simplex::pricing(mpq_class& cost_s, unsigned& s)
 	// However this approach doesn't prevent cycling, and following blands rule we selected just the *first*
 	// negative reduced cost, not the smallest... The code remains here for reference.
 	ldbg.vec(costs, "costs");
-	mpq_class min_cost = costs[0];
+	my_rational min_cost = costs[0];
 	// Find minimum cost
 	for (unsigned i = 1; i < costs.size(); i++) {
 		if (costs[i] < min_cost) {
@@ -433,14 +433,14 @@ void Simplex::pricing(mpq_class& cost_s, unsigned& s)
 	// We have found the column (index s) that should enter the basis
 }
 
-void Simplex::generate_col(const unsigned& s, const mpq_class& cost_s)
+void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
 {
 	// Column generation
 	ldbg << "Starting column generation.\n";
 	X_s.clear();
 	X_s.push_back(cost_s); // First row holds the cost
 	for (unsigned i = 1; i < (m+1); i++) { // loop through rows
-		mpq_class row_sum = 0;
+		my_rational row_sum = 0;
 		for (unsigned j = 1; j < (m+1); j++) {
 			ldbg << "Indices: " << i << "," << j << "," << s << "\n";
 			row_sum += CARRY[i][j]*A[j-1][s];
@@ -456,10 +456,10 @@ void Simplex::choose_pivot(unsigned& r)
 	// Determine pivot element according to blands anti-cycling rule.
 	// @see e.g. Papadimitriou/Steiglitz p. 53
 
-	vector<mpq_class> thetas;		// Theta_i: step length of row i
+	vector<my_rational> thetas;		// Theta_i: step length of row i
 	thetas.clear();
 
-	mpq_class theta_min = -1;		// Theta_0: Primal step length = min { Theta_i > 0 }
+	my_rational theta_min = -1;		// Theta_0: Primal step length = min { Theta_i > 0 }
 
 	r = 0;							// Reset row to be chosen
 
@@ -474,7 +474,7 @@ void Simplex::choose_pivot(unsigned& r)
 			continue;
 		}
 		// x_i0 / x_ij
-		mpq_class cur = CARRY[i][0]/X_s[i];
+		my_rational cur = CARRY[i][0]/X_s[i];
 		thetas.push_back(cur);
 		ldbg << "Pivot here? " << cur << "\n";
 		if (cur < 0)
@@ -522,13 +522,13 @@ void Simplex::objective()
 		lout << "Problem infeasible!\n";
 		return;
 	}
-	mpq_class obj = 0;
+	my_rational obj = 0;
 	for (unsigned i = 0; i < basis.size(); i++)
 	{
 		// obj = x_basic * cost_basic
 		obj += CARRY[i+1][0]*c[basis[i]-CARRY[0].size()];
 	}
-	lout << "Objective: " << obj << " = (" << (mpf_class)obj << ")\n";
+	lout << "Objective: " << obj << " = (" << (my_float)obj << ")\n";
 }
 void Simplex::variables()
 {
@@ -541,7 +541,7 @@ void Simplex::variables()
 	lout << "Variable name\t\t" << "Solution value\n";
 	for (unsigned i = 0; i < basis.size(); i++)
 	{
-		lout << lp.variables.elements[basis[i]-CARRY[0].size()] << "\t\t\t" << CARRY[i+1][0] << " (" << (mpf_class)CARRY[i+1][0] << ")\n";
+		lout << lp.variables.elements[basis[i]-CARRY[0].size()] << "\t\t\t" << CARRY[i+1][0] << " (" << (my_float)CARRY[i+1][0] << ")\n";
 	}
 	lout << "All other variables are 0.\n";
 }

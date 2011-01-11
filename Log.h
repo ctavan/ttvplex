@@ -6,8 +6,7 @@
 #include <vector>
 #include <string>
 
-// GMP: The GNU Multiple Precision Arithmetic Library
-#include <gmpxx.h>
+#include "numbers.h"
 
 
 using namespace std;
@@ -69,7 +68,7 @@ class Log: public ostream{
 	\return void
 	\sa
 **/
-		void vec(vector< mpq_class > v, string name);
+		void vec(vector< my_rational > v, string name);
 		void vec(vector< unsigned > v, string name);
 		void vec(vector< string > v, string name);
 /** \brief Dump a 2D-matrix
@@ -82,7 +81,7 @@ class Log: public ostream{
 	\return description of return value
 	\sa
 **/
-		void matrix(vector< vector< mpq_class > > m, string name, bool tofloat = false);
+		void matrix(vector< vector< my_rational > > m, string name, bool tofloat = false);
 };
 
 #endif

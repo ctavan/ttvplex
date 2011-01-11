@@ -29,10 +29,10 @@ class Matrix {
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
 	\param  vector m x m Matrix A
-	\return mpq_class Value of the determinant
+	\return my_rational Value of the determinant
 	\sa
 **/
-		mpq_class det(vector< vector< mpq_class > > A);
+		my_rational det(vector< vector< my_rational > > A);
 /** \brief Transpose matrix
 	
 	Transpose matrix A and write the transposed matrix to At.
@@ -44,7 +44,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void transpose(vector< vector< mpq_class > > A, vector< vector< mpq_class > > At);
+		void transpose(vector< vector< my_rational > > A, vector< vector< my_rational > > At);
 /** \brief Matrix multiplication
 	
 	Multiply matrix A with matrix B and write result to matrix R.
@@ -57,7 +57,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void multiply(vector< vector< mpq_class > > A, vector< vector< mpq_class > > B, vector< vector< mpq_class > > R);
+		void multiply(vector< vector< my_rational > > A, vector< vector< my_rational > > B, vector< vector< my_rational > > R);
 /** \brief Invert matrix
 	
 	Compute the inverse of matrix A and write it into Ai.
@@ -69,7 +69,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		void inverse(vector< vector< mpq_class > > A, vector< vector< mpq_class > > Ai);
+		void inverse(vector< vector< my_rational > > A, vector< vector< my_rational > > Ai);
 /** \brief Perform pivot operation
 	
 	Perform a pivot operation on the given pivot-element ij (indices starting at 0)
@@ -83,7 +83,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		static void pivot(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const int& i, const int& j);
+		static void pivot(vector< vector< my_rational > >& B, const vector< vector< my_rational > >& A, const int& i, const int& j);
 /** \brief Subtract row j from row i
 	
 	Subtracts row j of input matrix A from row i. The input matrix is manipulated directly.
@@ -96,7 +96,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		static void row_subtract(vector< vector< mpq_class > >& A, const int& i, const int& j);
+		static void row_subtract(vector< vector< my_rational > >& A, const int& i, const int& j);
 /** \brief Append vector x to matrix A
 	
 	Appends vector x to matrix A and writes the result to matrix B: B = A|x
@@ -109,7 +109,7 @@ class Matrix {
 	\return void
 	\sa
 **/
-		static void append_vec(vector< vector< mpq_class > >& B, const vector< vector< mpq_class > >& A, const vector< mpq_class >& x);
+		static void append_vec(vector< vector< my_rational > >& B, const vector< vector< my_rational > >& A, const vector< my_rational >& x);
 };
 
 #endif

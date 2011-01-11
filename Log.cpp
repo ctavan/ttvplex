@@ -18,7 +18,7 @@ void Log::message(string text)
 	(ostream&)*this << text << endl;
 }
 
-void Log::vec(vector< mpq_class > v, string name)
+void Log::vec(vector< my_rational > v, string name)
 {
 	if (level < 1) {
 		return;
@@ -48,7 +48,7 @@ void Log::vec(vector< string > v, string name)
 		(ostream&)*this << v[i] << endl;
 	}
 }
-void Log::matrix(vector< vector< mpq_class > > m, string name, bool tofloat)
+void Log::matrix(vector< vector< my_rational > > m, string name, bool tofloat)
 {
 	if (level < 1) {
 		return;
@@ -59,11 +59,11 @@ void Log::matrix(vector< vector< mpq_class > > m, string name, bool tofloat)
 		for (unsigned j = 0; j < m[i].size(); j++) {
 			if (tofloat)
 			{
-				(ostream&)*this << (mpf_class)m[i][j] << "\t";
+				(ostream&)*this << (my_float)m[i][j] << "\t";
 			}
 			else
 			{
-				(ostream&)*this << (mpq_class)m[i][j] << "\t";
+				(ostream&)*this << (my_rational)m[i][j] << "\t";
 			}
 		}
 		(ostream&)*this << endl;

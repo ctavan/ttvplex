@@ -345,7 +345,8 @@ void LPParser::read()
 	}
 
 	// Dump the lp
-	dump();
+	linf << "LPParser: LP as read from the input file:\n";
+	dump(linf);
 
 	// Finally collect all variables of the system
 	collect_variables();
@@ -373,7 +374,7 @@ void LPParser::collect_variables()
 		variables.add(bounds[i].name);
 	}
 	linf << "LPParser: Variables in the system:\n";
-	variables.dump();
+	variables.dump(linf);
 }
 
 void LPParser::standardize()
@@ -382,10 +383,6 @@ void LPParser::standardize()
 	boundconstraints();
 	slacksurplus();
 	positive_rhs();
-
-	linf << "===================================================\n";
-	linf << "LP now in standard form\n";
-	dump();
 }
 
 void LPParser::boundconstraints()
@@ -443,10 +440,10 @@ void LPParser::boundconstraints()
 					}
 					ldbg << "Found variable " << oldname << " in this constraint, adjusting rhs.\n";
 					// b_x = x - lower => x = b_x + lower
-					// constraints[j].dump();
+					// constraints[j].dump(ldbg);
 					constraints[j].elements[k].name = newname;
 					constraints[j].rhs -= constraints[j].elements[k].coeff*lower;
-					// constraints[j].dump();
+					// constraints[j].dump(ldbg);
 				}
 			}
 		}
@@ -488,13 +485,13 @@ void LPParser::boundconstraints()
 					}
 					ldbg << "Found variable " << oldname << " in this constraint, replacing by split variable.\n";
 					// b_x = x - lower => x = b_x + lower
-					// constraints[j].dump();
+					// constraints[j].dump(ldbg);
 					constraints[j].elements[k].name = pname;
 					LPVariable mvar;
 					mvar.name = mname;
 					mvar.coeff = -1*constraints[j].elements[k].coeff;
 					constraints[j].elements.push_back(mvar);
-					// constraints[j].dump();
+					// constraints[j].dump(ldbg);
 				}
 			}
 		}
@@ -718,33 +715,33 @@ void LPParser::parse_varcoeff(string str, vector<LPVariable>& elements)
 	ldbg << "LPParser: Generated variable '" << var.name << "' with coefficient '" << var.coeff << "'\n";
 }
 
-void LPParser::dump_objective(const bool& detailed)
+void LPParser::dump_objective(Log& out, const bool& detailed)
 {
-	linf << "Objective:\n";
-	objective.dump(detailed);
+	out << "Objective:\n";
+	objective.dump(out, detailed);
 }
 
-void LPParser::dump_constraints(const bool& detailed)
+void LPParser::dump_constraints(Log& out, const bool& detailed)
 {
-	linf << "Constraints:\n";
+	out << "Constraints:\n";
 	for (unsigned i = 0; i < constraints.size(); i++)
 	{
-		constraints[i].dump(detailed);
+		constraints[i].dump(out, detailed);
 	}	
 }
 
-void LPParser::dump_bounds(const bool& detailed)
+void LPParser::dump_bounds(Log& out, const bool& detailed)
 {
-	linf << "Bounds:\n";
+	out << "Bounds:\n";
 	for (unsigned i = 0; i < bounds.size(); i++)
 	{
-		bounds[i].dump(detailed);
+		bounds[i].dump(out, detailed);
 	}
 }
 
-void LPParser::dump(const bool& detailed)
+void LPParser::dump(Log& out, const bool& detailed)
 {
-	dump_objective(detailed);
-	dump_constraints(detailed);
-	dump_bounds(detailed);
+	dump_objective(out, detailed);
+	dump_constraints(out, detailed);
+	dump_bounds(out, detailed);
 }
