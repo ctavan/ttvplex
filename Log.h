@@ -78,10 +78,11 @@ class Log: public ostream{
 	\date 2010-12-27
 	\param  vector m x n matrix
 	\param  string Name of the matrix
+	\param  float Optional, whether to convert output to floats
 	\return description of return value
 	\sa
 **/
-		void matrix(vector< vector<mpq_class> > m, string name);
+		void matrix(vector< vector< mpq_class > > m, string name, bool tofloat = false);
 };
 
 #endif

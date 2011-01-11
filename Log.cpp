@@ -48,8 +48,7 @@ void Log::vec(vector< string > v, string name)
 		(ostream&)*this << v[i] << endl;
 	}
 }
-
-void Log::matrix(vector< vector< mpq_class > > m, string name)
+void Log::matrix(vector< vector< mpq_class > > m, string name, bool tofloat)
 {
 	if (level < 1) {
 		return;
@@ -58,7 +57,14 @@ void Log::matrix(vector< vector< mpq_class > > m, string name)
 	for (unsigned i = 0; i < m.size(); i++) {
 		(ostream&)*this << "> ";
 		for (unsigned j = 0; j < m[i].size(); j++) {
-			(ostream&)*this << m[i][j] << "\t";
+			if (tofloat)
+			{
+				(ostream&)*this << (mpf_class)m[i][j] << "\t";
+			}
+			else
+			{
+				(ostream&)*this << (mpq_class)m[i][j] << "\t";
+			}
 		}
 		(ostream&)*this << endl;
 	}
