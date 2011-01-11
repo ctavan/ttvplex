@@ -38,6 +38,18 @@ class Simplex {
 	\sa
 **/
 		void pricing(my_rational& cost_s, unsigned& s);
+/** \brief Calculates the reduced cost of column j
+	
+		This method takes into consideration whether we're in phase 1 or phase 2 and calculates the reduced cost
+		coefficient for column j accordingly.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-11
+	\param unsigned Column-index
+	\return The reduced cost of column j
+	\sa
+**/
+		my_rational redcost(const unsigned& j);
 /** \brief Column generation
 	
 		Generates the pivot column X_s from the original coefficient matrix A and the CARRY-matrix. s is the index

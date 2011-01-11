@@ -103,7 +103,7 @@ void Simplex::init()
 void Simplex::optimize()
 {
 	int counter = 0;					// Counter to avoid infinite loops
-	const int max_iterations = 10;	// Maximum number of iterations to be performed
+	const int max_iterations = 100;	// Maximum number of iterations to be performed
 
 	optimal = false;
 	phase = 1;
@@ -121,27 +121,13 @@ void Simplex::optimize()
 		// this variable will be set to true by the pricing routine.
 		optimal = false;
 
+		// Calculate the whole tableau (just for debugging)
 		vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
 		TABLEAU.clear();
 		TABLEAU = CARRY;
 		for (unsigned j = 0; j < n; j++)
 		{
-			my_rational cost = 0;
-			for (unsigned k = 1; k < (m+1); k++) {
-				cost += CARRY[0][k]*A[k-1][j];
-				// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
-			}
-			ldbg << "Cost c = " << cost << "\n";
-		
-			my_rational d = 0;
-			if (phase == 1)
-			{
-				for (unsigned k = 0; k < m; k++) {
-					d -= A[k][j];
-				}
-				ldbg << "d = " << d << "\n";
-				cost = d + cost;
-			}
+			my_rational cost = redcost(j);
 			generate_col(CARRY[0].size()+j, cost);
 			Matrix::append_vec(TABLEAU, TABLEAU, X_s);
 		}
@@ -166,15 +152,53 @@ void Simplex::optimize()
 					ldbg << "Checking if basis column b[" << i << "] = " << basis[i] << " is artificial variable, i.e. belongs to column 1 - " << m << " (0th col is RHS).\n";
 					if (basis[i] <= m)
 					{
-						lout << "PHASE 1: Optimal solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
+						lout << "PHASE 1: Basic feasible solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
+						lout << "@TODO";
+						exit(EXIT_FAILURE);
 					}
 				}
-				lout << "PHASE 1: All minimum reduced costs > 0 => we're optimal!" << "\n";
+				lout << "PHASE 1: Basic feasible solution found => continuing with PHASE 2!" << "\n";
+				phase = 2;
+				optimal = false;
+				lout << "PHASE 2: Starting\n";
+				// Calculate new (real) reduced cost
+				// loop over rows
+				linf.matrix(CARRY, "CARRY");
+				for (unsigned j = 0; j < basis.size(); j++)
+				{
+					// c[basis[i]-CARRY[0].size()]
+					ldbg << "Calculating new reduced cost for column " << j << "\n";
+					my_rational cost = 0;
+					ldbg << "Summing: ";
+					for (unsigned i = 0; i < basis.size(); i++)
+					{
+						cost -= c[basis[i]-CARRY[0].size()]*CARRY[i+1][j+1];
+						ldbg << "+ " << c[basis[i]-CARRY[0].size()] << " * " << CARRY[i+1][j+1] << " ";
+					}
+					ldbg << "\nCost is: " << cost << "\n";
+					CARRY[0][j+1] = cost;
+				}
+				// Calculate new objective value
+				my_rational cost = 0;
+				ldbg << "Calculating new objective value:\n";
+				ldbg << "Summing: ";
+				for (unsigned i = 0; i < basis.size(); i++)
+				{
+					cost -= c[basis[i]-CARRY[0].size()]*CARRY[i+1][0];
+					ldbg << "+ " << c[basis[i]-CARRY[0].size()] << " * " << CARRY[i+1][0] << " ";
+				}
+				ldbg << "\nCost is: " << cost << "\n";
+				CARRY[0][0] = cost;
+				linf.matrix(CARRY, "CARRY");
+				continue;
 			}
 			linf.matrix(CARRY, "CARRY");
 			linf.matrix(CARRY, "CARRY", true);
 			linf.vec(basis, "basis");
-			break;
+			if (infeasible || optimal)
+			{
+				break;
+			}
 		}
 
 		// If selected column is NOT inside CARRY, generate it!
@@ -229,15 +253,18 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 {
 	s = 0;
 
-	// First of all check through the reduced costs, that are present in the CARRY-matrix!
-	for (unsigned j = 1; j < CARRY[0].size(); j++)
+	// In Phase I First of all check through the reduced costs, that are present in the CARRY-matrix!
+	if (phase == 1)
 	{
-		ldbg << "Cost in CARRY: CARRY[0][" << j << "] = " << CARRY[0][j] << "\n";
-		if (CARRY[0][j] < 0)
+		for (unsigned j = 1; j < CARRY[0].size(); j++)
 		{
-			cost_s = CARRY[0][j];
-			s = j;
-			return;
+			ldbg << "Cost in CARRY: CARRY[0][" << j << "] = " << CARRY[0][j] << "\n";
+			if (CARRY[0][j] < 0)
+			{
+				cost_s = CARRY[0][j];
+				s = j;
+				return;
+			}
 		}
 	}
 
@@ -260,28 +287,7 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 		}
 		ldbg << " => it is not!\n";
 
-		// pi^T A_j
-		my_rational cost = 0;
-		for (unsigned k = 1; k < (m+1); k++) {
-			cost += CARRY[0][k]*A[k-1][j];
-			// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
-		}
-		ldbg << "Cost c = " << cost << "\n";
-
-		my_rational d = 0;
-		if (phase == 1)
-		{
-			for (unsigned k = 0; k < m; k++) {
-				d -= A[k][j];
-			}
-			ldbg << "d = " << d << "\n";
-			cost = d + cost;
-		}
-		if (phase == 2)
-		{
-			d = c[j];
-			ldbg << "d = c_" << j << " = " << d << "\n";
-		}
+		my_rational cost = redcost(j);
 		costs.push_back(cost);
 
 		ldbg << "Phase " << phase << " reduced cost = " << cost << " at column s = " << CARRY[0].size()+j << " (j = " << j << ")\n";
@@ -321,6 +327,33 @@ void Simplex::pricing(my_rational& cost_s, unsigned& s)
 	}
 	cost_s = costs[s];
 	// We have found the column (index s) that should enter the basis
+}
+
+my_rational Simplex::redcost(const unsigned& j)
+{
+	// pi^T A_j
+	my_rational cost = 0;
+	for (unsigned k = 1; k < (m+1); k++) {
+		cost += CARRY[0][k]*A[k-1][j];
+		// ldbg << "Multiply " << CARRY[0][k] << " * " << A[k-1][j] << "\n";
+	}
+	ldbg << "Cost c = " << cost << "\n";
+
+	my_rational d = 0;
+	if (phase == 1)
+	{
+		for (unsigned k = 0; k < m; k++) {
+			d -= A[k][j];
+		}
+		ldbg << "d = " << d << "\n";
+	}
+	if (phase == 2)
+	{
+		d = c[j];
+		ldbg << "d = c_" << j << " = " << d << "\n";
+	}
+	cost = d + cost;
+	return cost;
 }
 
 void Simplex::generate_col(const unsigned& s, const my_rational& cost_s)
