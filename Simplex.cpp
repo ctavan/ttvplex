@@ -284,9 +284,10 @@ void Simplex::optimize()
 		if (optimal == true)
 		{
 			// Phase 1: We reached optimality but objective > 0 => Infeasible. (@see Case 2 in Papadimitriou/Steiglitz, p. 56)
-			if (phase == 1 && CARRY[0][0] > 0)
+			if (phase == 1 && CARRY[0][0] < 0)
 			{
 				lout << "PHASE 1: All minimum reduced costs > 0 but objective xi = " << CARRY[0][0] << " > 0 => Infeasible!" << "\n";
+				infeasible = true;
 			}
 			// Phase 1: Objective is 0 -> Check if there are artificial variables left in the basis
 			if (phase == 1 && CARRY[0][0] == 0)
@@ -340,7 +341,7 @@ void Simplex::optimize()
 
 		if (counter > max_iterations) {
 			lerr << "Still no result after max_iterations\n";
-			break;
+			exit(EXIT_FAILURE);
 		}
 		counter++;
 	}
@@ -516,6 +517,11 @@ void Simplex::choose_pivot(unsigned& r)
 
 void Simplex::objective()
 {
+	if (infeasible)
+	{
+		lout << "Problem infeasible!\n";
+		return;
+	}
 	mpq_class obj = 0;
 	for (unsigned i = 0; i < basis.size(); i++)
 	{
@@ -526,6 +532,12 @@ void Simplex::objective()
 }
 void Simplex::variables()
 {
+	if (infeasible)
+	{
+		lout << "Problem infeasible!\n";
+		return;
+	}
+	ldbg.vec(basis, "basis");
 	lout << "Variable name\t\t" << "Solution value\n";
 	for (unsigned i = 0; i < basis.size(); i++)
 	{

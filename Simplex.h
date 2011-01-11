@@ -64,7 +64,7 @@ class Simplex {
 		void choose_pivot(unsigned& r);
 
 	public:
-		Simplex(LPParser &l) : phase(1), lp(l), optimal(false) {};
+		Simplex(LPParser &l) : phase(1), lp(l), optimal(false), infeasible(false) {};
 
 /** \brief Initialize the tableaus
 	
@@ -87,6 +87,7 @@ class Simplex {
 		unsigned m; //!< Number of rows of the initial matrix
 		unsigned n; //!< Number of columns of the initial matrix
 		bool optimal;	//!< Whether we're optimal or not. Used to stop the simplex iterations
+		bool infeasible;	//!< Whether the problem is infeasible. Defaults to false
 		vector< vector< mpq_class > > A; //!< Initial coefficient matrix
 		vector< mpq_class > b; //!< Initial righthand side
 		vector< mpq_class > c; //!< Initial cost coefficients
