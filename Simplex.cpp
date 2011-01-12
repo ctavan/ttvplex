@@ -211,7 +211,12 @@ void Simplex::optimize()
 
 				phase = 2;
 				optimal = false;
+				lout << "===================================================\n";
+				lout << "===================================================\n";
 				lout << "PHASE 2: Starting\n";
+				// Remove artificial variables
+				
+
 				// Calculate new (real) reduced cost
 				// loop over rows
 				linf.matrix(CARRY, "CARRY");
@@ -243,6 +248,10 @@ void Simplex::optimize()
 				linf.matrix(CARRY, "CARRY");
 				continue;
 			} // phase == 1 && CARRY[0][0] == 0
+			if (phase == 2 && optimal)
+			{
+				ldbg << "PHASE 2 optimal?\n";
+			}
 			linf.matrix(CARRY, "CARRY");
 			linf.matrix(CARRY, "CARRY", true);
 			linf.vec(basis, "basis");
@@ -258,13 +267,20 @@ void Simplex::optimize()
 			// Generate column s (is written to member vector X_s)
 			generate_col(s, cost_s);
 		}
+		else
+		{
+			// Extract column i from CARRY
+			X_s.clear();
+			for (unsigned i = 0; i < CARRY.size(); i++)
+			{
+				X_s.push_back(CARRY[i][s]);
+			}
+		}
 
 		// Choose pivot element, i.e. determine row r. Pivot element is then x_rs
-		// r is counted w.r.t the original coefficient matrix A, not w.r.t. the tableau:
-		// so r = 0 means the first row that doesn't hold costs
 		choose_pivot(r, X_s);
 
-		linf << "=====> Let column " << basis[r] << " leave the basis and column " << s << " enter.\n";
+		linf << "=====> Let column basis[" << r-1 << "] = " << basis[r-1] << " leave the basis and column " << s << " enter.\n";
 		linf << "Pivot element determined: r,s = " << r << "," << s << " (" << (r+1) << "," << (s+1) << ")\n";
 
 		vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
@@ -274,7 +290,7 @@ void Simplex::optimize()
 		ldbg.matrix(CARRY_X_s, "CARRY_X_s");
 		// Pivot element in the carry-matrix is at row r (since 0th first row holds the cost
 		// ) and either in one of the columns contained in CARRY or in the last column which is X_s
-		Matrix::pivot(CARRY_X_s, CARRY_X_s, r, (s > CARRY[0].size() ? CARRY[0].size() : s));
+		Matrix::pivot(CARRY_X_s, CARRY_X_s, r, CARRY[0].size());
 		ldbg.matrix(CARRY_X_s, "CARRY_X_s");
 
 		// Update the basis: Basis values count with respect to the whole tableau!
@@ -441,9 +457,9 @@ void Simplex::choose_pivot(unsigned& r, const vector<my_rational>& col)
 	for (unsigned i = 1; i < (m+1); i++)
 	{
 		// assure x_ij > 0  (col[i] = x_ij)
-		if (col[i] == 0)
+		if (col[i] <= 0)
 		{
-			ldbg << "col[" << (i) << "] == 0" << "\n";
+			ldbg << "col[" << (i) << "] = " << col[i] << " <= 0" << "\n";
 			thetas.push_back(-1);
 			continue;
 		}
@@ -451,11 +467,6 @@ void Simplex::choose_pivot(unsigned& r, const vector<my_rational>& col)
 		my_rational cur = CARRY[i][0]/col[i];
 		thetas.push_back(cur);
 		ldbg << "Pivot here? " << cur << "\n";
-		if (cur < 0)
-		{
-			ldbg << "Current value negative: " << cur << "\n";
-			continue;
-		}
 		if (theta_min < 0 || (theta_min > 0 && cur < theta_min))
 		{
 			theta_min = cur;

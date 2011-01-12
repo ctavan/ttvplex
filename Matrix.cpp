@@ -26,7 +26,7 @@ void Matrix::inverse(vector< vector< my_rational > > A, vector< vector< my_ratio
 
 void Matrix::pivot(vector< vector< my_rational > >& B, const vector< vector< my_rational > >& A, const int& i, const int& j)
 {
-	ldbg << "Pivoting on element: [" << i << "][" << j << "]\n";
+	ldbg << "Pivoting on element: [" << i << "][" << j << "] = " << A[i][j] << "\n";
 
 	// Make sure the target matrix B holds a copy of the inital matrix A
 	B = A;
