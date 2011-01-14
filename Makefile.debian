@@ -32,12 +32,12 @@ default: main.cpp main.o global.o Simplex.o Log.o Matrix.o LPParser.o $(GMPXX_LI
 	$(CC) $(CFLAGS) $(INCLUDE) $(LIBS) $(LDFLAGS) -o $(PROGRAMNAME) main.o global.o Simplex.o Log.o Matrix.o LPParser.o $(GMP_LIBS)
 
 # Dependencies
-main.o: main.cpp main.h
-global.o: global.cpp global.h
-Simplex.o: Simplex.cpp Simplex.h
-Log.o: Log.cpp Log.h
-Matrix.o: Matrix.cpp Matrix.h
-LPParser.o: LPParser.cpp LPParser.h
+main.o: main.cpp main.h $(GMPXX_LIB_A)
+global.o: global.cpp global.h $(GMPXX_LIB_A)
+Simplex.o: Simplex.cpp Simplex.h $(GMPXX_LIB_A)
+Log.o: Log.cpp Log.h $(GMPXX_LIB_A)
+Matrix.o: Matrix.cpp Matrix.h $(GMPXX_LIB_A)
+LPParser.o: LPParser.cpp LPParser.h $(GMPXX_LIB_A)
 
 # Create or refresh an object-file
 # $< will be replaced by the name of the cpp-file
