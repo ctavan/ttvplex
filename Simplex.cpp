@@ -238,6 +238,7 @@ void Simplex::optimize()
 									CARRY[ii][jj] = CARRY_X_s[ii][jj];
 								}
 							}
+							lout << "Monitoring xi: " << CARRY[0][0] << "\n";
 							// full_tableau();
 							// exit(EXIT_FAILURE);
 						} // for
