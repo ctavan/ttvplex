@@ -19,13 +19,16 @@ The code is (c) 2011 by the authors and distributed under the MIT license.
 
 Installation
 ------------
+
 Requirements:
+
 *	TTVPLex requires a recent version of the GNU C++ compiler g++ to be
 	installed on the system.
 *	TTVPlex makes use of The GNU Multiple Precision Arithmetic Library (GMP).
 	GMP needs either to be installed on the system or be compiled locally.
 
 Mac OS X:
+
 1.	It is easiest to use Macports (http://www.macports.org/) to install GMP:
 		sudo port install gmp
 2.	Create a symbolic link to the correct Makefile:
@@ -34,6 +37,7 @@ Mac OS X:
 		make
 
 Debian/Ubuntu:
+
 1.	You can install GMP through apt-get. If you do so, use the makefile 
 	`Makefile.macosx` and adjust the `GMP_INC` and `GMP_LIB` paths 
 	accordingly.
