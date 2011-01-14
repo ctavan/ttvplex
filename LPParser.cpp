@@ -210,7 +210,7 @@ void LPParser::read()
 						// Here we finally have the value of the RHS
 						else
 						{
-							constr.rhs *= (mpq_class)parts[i];
+							constr.rhs *= (my_rational)parts[i];
 							constraint_rhs = false;
 							constraint_finished = true;
 						}
@@ -424,7 +424,7 @@ void LPParser::boundconstraints()
 		// Variable is not unbounded from below, but has a nonzero lower bound
 		if (!bounds[i].lower_unbound && bounds[i].lower != 0)
 		{
-			mpq_class lower = bounds[i].lower;
+			my_rational lower = bounds[i].lower;
 			string oldname = bounds[i].name;
 			string newname = variables.replaceBounded(bounds[i].name);
 			ldbg << "Variable '" << oldname << "' has nonzero lower bound: " << lower << "\n";
@@ -718,7 +718,7 @@ void LPParser::parse_varcoeff(string str, vector<LPVariable>& elements)
 
 	if (varcoeff.size() > 0)
 	{
-		var.coeff = var.coeff*(mpq_class)atoi(varcoeff.c_str());
+		var.coeff = var.coeff*(my_rational)atoi(varcoeff.c_str());
 	}
 	if (elements.size() > 0)
 	{

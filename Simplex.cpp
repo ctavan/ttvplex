@@ -180,94 +180,110 @@ void Simplex::optimize()
 					for (unsigned i = 0; i < basis.size(); i++)
 					{
 						ldbg << "Checking if basis column b[" << i << "] = " << basis[i] << " is artificial variable, i.e. belongs to column 1 - " << m << " (0th col is RHS).\n";
-						if (basis[i] <= m)
+						if (basis[i] > m)
 						{
-							lout << "PHASE 1: Basic feasible solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
-
-							write_to_file();
-
-							for (unsigned j = 0; j < n; j++)
+							if (i == basis.size()-1)
 							{
-								ldbg << "~~ Checking column " << j << "\n";
-								// Check if column j is a basic column
-								if (is_basic(j))
-								{
-									continue;
-								}
-								ldbg << "~~ Generating non-basic column " << j << "\n";
-								// Generate j'th column
-								my_rational cost = redcost(j);
-								generate_col(CARRY[0].size()+j, cost);
-								ldbg << "x[i][j] = " << X_s[i+1] << "\n";
-								if (X_s[i+1] != 0)
-								{
-									ldbg.level = 3;
-									ldbg << "@TODO: Pivot with this element: r,s = " << i+1 << "," << CARRY[0].size()+j << "\n";
-
-									vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
-									Matrix::append_vec(CARRY_X_s, CARRY, X_s);	// and append the newly generated column
-
-									// Perform Pivot
-									full_tableau();
-									// Pivot element in the carry-matrix is at row r (since 0th first row holds the cost
-									// ) and either in one of the columns contained in CARRY or in the last column which is X_s
-									Matrix::pivot(CARRY_X_s, CARRY_X_s, i+1, CARRY[0].size());
-
-									// Update the basis: Basis values count with respect to the whole tableau!
-									basis[i] = CARRY[0].size()+j;
-									lout.vec(basis, "basis");
-
-									// Update carry matrix
-									for (unsigned i = 0; i < CARRY.size(); i++) {
-										for (unsigned j = 0; j < CARRY[i].size(); j++) {
-											CARRY[i][j] = CARRY_X_s[i][j];
-										}
-									}
-									full_tableau();
-									exit(EXIT_FAILURE);
-								}
+								// At this point we can enter phase 2 (no artificial variables in the basis)
+								phase = 2;
+								write_to_file();
 							}
-							lout << "PHASE 1: All x_ij = 0 in row i = " << i+1 << "\n";
-							ldbg << "erasing row " << i+1 << "\n";
-
-							ldbg.vec(basis, "basis");
-							basis.erase(basis.begin()+i);
-							// Adjust basis-indices (subtract -1) since we remove a column from the tableau
-							for (unsigned k = 0; k < basis.size(); k++)
-							{
-								if (basis[k] > i)
-								{
-									basis[k]--;
-								}
-							}
-							ldbg.vec(basis, "basis");
-
-							ldbg.vec(b, "b");
-							b.erase(b.begin()+i);
-							ldbg.vec(b, "b");
-
-							ldbg.matrix(A, "A");
-							A.erase(A.begin()+i);
-							ldbg.matrix(A, "A");
-
-							lout << "PHASE 1: New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
-
-							ldbg.matrix(CARRY, "CARRY");
-							CARRY.erase(CARRY.begin()+i+1);
-							m--;
-							for (unsigned k = 0; k < CARRY.size(); k++)
-							{
-								CARRY[k].erase(CARRY[k].begin()+i+1);
-							}
-							ldbg.matrix(CARRY, "CARRY");
-							full_tableau();
-
-							ldbg << "Removed row " << i+1 << " from the system!\n";
 							continue;
 						}
-						// At this point we can enter phase 2
-						phase = 2;
+						lout << "PHASE 1: Basic feasible solution found, but basis column basis[" << i << "] = " << basis[i] << " is an artificial variable\n";
+
 						write_to_file();
+
+						bool allzero = true;
+
+						// Search for a nonzero, nonbasic column in the i'th row
+						for (unsigned j = 0; j < n; j++)
+						{
+							lout << "~~ Checking column " << j << "\n";
+							// Check if column j is a basic column
+							if (is_basic(j))
+							{
+								continue;
+							}
+							lout << "~~ Generating non-basic column " << j << "\n";
+							// Generate j'th column
+							my_rational cost = redcost(j);
+							generate_col(CARRY[0].size()+j, cost);
+							ldbg << "x[i][j] = " << X_s[i+1] << "\n";
+							// If ij-element is zero, we cant pivot, continue
+							if (X_s[i+1] == 0)
+							{
+								continue;
+							}
+							// ij-element was not zero, so we can pivot here.
+							allzero = false;
+							linf << "Pivot with this element: r,s = " << i+1 << "," << CARRY[0].size()+j << " to get rid of the artificial variable basis[" << i << "] = " << basis[i] << " in the basis\n";
+
+							vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
+							Matrix::append_vec(CARRY_X_s, CARRY, X_s);	// and append the newly generated column
+
+							// Perform Pivot
+							// full_tableau();
+							// Pivot element in the carry-matrix is at row r (since 0th first row holds the cost
+							// ) and either in one of the columns contained in CARRY or in the last column which is X_s
+							Matrix::pivot(CARRY_X_s, CARRY_X_s, i+1, CARRY[0].size());
+
+							// Update the basis: Basis values count with respect to the whole tableau!
+							basis[i] = CARRY[0].size()+j;
+							// lout.vec(basis, "basis");
+
+							// Update carry matrix
+							for (unsigned ii = 0; ii < CARRY.size(); ii++) {
+								for (unsigned jj = 0; jj < CARRY[ii].size(); jj++) {
+									CARRY[ii][jj] = CARRY_X_s[ii][jj];
+								}
+							}
+							// full_tableau();
+							// exit(EXIT_FAILURE);
+						} // for
+						// If not all entries in this row were zero, we recheck the basis
+						if (!allzero) {
+							i = 0;
+							continue;
+						}
+						// All entries in this row were zero, so we can reduce the system size
+						lout << "PHASE 1: All x_ij = 0 in row i = " << i+1 << "\n";
+						ldbg << "erasing row " << i+1 << "\n";
+
+						ldbg.vec(basis, "basis");
+						basis.erase(basis.begin()+i);
+						// Adjust basis-indices (subtract -1) since we remove a column from the tableau
+						for (unsigned k = 0; k < basis.size(); k++)
+						{
+							if (basis[k] > i)
+							{
+								basis[k]--;
+							}
+						}
+						ldbg.vec(basis, "basis");
+
+						ldbg.vec(b, "b");
+						b.erase(b.begin()+i);
+						ldbg.vec(b, "b");
+
+						ldbg.matrix(A, "A");
+						A.erase(A.begin()+i);
+						ldbg.matrix(A, "A");
+
+						lout << "PHASE 1: New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
+
+						ldbg.matrix(CARRY, "CARRY");
+						CARRY.erase(CARRY.begin()+i+1);
+						m--;
+						for (unsigned k = 0; k < CARRY.size(); k++)
+						{
+							CARRY[k].erase(CARRY[k].begin()+i+1);
+						}
+						ldbg.matrix(CARRY, "CARRY");
+						full_tableau();
+
+						ldbg << "Removed row " << i+1 << " from the system!\n";
+						i = 0;
 					}
 				} // while phase == 1
 				lout << "PHASE 1: Found basic feasible solution after " << counter << " iterations => continuing with PHASE 2!\n";
