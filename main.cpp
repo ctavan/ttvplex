@@ -6,10 +6,13 @@ int main(int argc, char** argv)
 {
 	// Some variables that will be filled with values given through the commandline
 	string input;	// Inputfilename
+	string input_carry;	// Inputfilename for carry matrix
+	string input_basis;	// Inputfilename for basis
 	bool display_problem = false;	// Whether to display problem again
 	bool display_objective = false;	// Whether to display objective
 	bool display_variables = false;	// Whether to display variables
 	bool optimize = false;	// Whether to optimize
+	int start_phase = 1;
 
 	// Handle commandline arguments using the nice TCLAP library
 	// @see http://tclap.sourceforge.net/
@@ -38,6 +41,15 @@ int main(int argc, char** argv)
 
 		TCLAP::ValueArg<string> inputArg("i","input","Input LP file", true, "", "string");
 		cmd.add( inputArg );
+
+		TCLAP::ValueArg<string> input_carryArg("c","carry","Input file with a carry matrix to start from", false, "", "string");
+		cmd.add( input_carryArg );
+
+		TCLAP::ValueArg<string> input_basisArg("b","basis","Input file with a basis to start from", false, "", "string");
+		cmd.add( input_basisArg );
+
+		TCLAP::ValueArg<int> start_phaseArg("s","phase","Phase to start in. 1 or 2", false, 1, "int");
+		cmd.add( start_phaseArg );
 
 		TCLAP::ValueArg<int> maxitArg("m","maxit","Maximum number of iterations", false, 0, "int");
 		cmd.add( maxitArg );
@@ -76,6 +88,8 @@ int main(int argc, char** argv)
 		}
 
 		input = inputArg.getValue();
+		input_carry = input_carryArg.getValue();
+		input_basis = input_basisArg.getValue();
 		max_iterations = maxitArg.getValue();
 
 		display_problem = display_problemArg.getValue();
@@ -83,13 +97,14 @@ int main(int argc, char** argv)
 		display_variables = display_variablesArg.getValue();
 
 		optimize = optimizeArg.getValue();
+
+		start_phase = start_phaseArg.getValue();
 	}
 	catch (TCLAP::ArgException &e)  // catch any exceptions
 	{
 		cerr << "error: " << e.error() << " for arg " << e.argId() << endl; 
 		exit(EXIT_FAILURE);
 	}
-
 
 	LPParser lp(input);
 	lp.read();
@@ -110,7 +125,7 @@ int main(int argc, char** argv)
 	}
 
 	Simplex smp(lp);
-	smp.init();
+	smp.init(input_carry, input_basis, start_phase);
 	if (optimize)
 	{
 		smp.optimize();

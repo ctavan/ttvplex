@@ -7,7 +7,7 @@ using namespace std;
 // 
 // }
 
-void Simplex::init()
+void Simplex::init(const string& input_carry, const string& input_basis, const int& start_phase)
 {
 	ldbg << "Filling vector b with righthandsides from the constraints.\n";
 	b.clear();
@@ -60,36 +60,72 @@ void Simplex::init()
 	}
 	ldbg.vec(c, "c");
 
-	ldbg << "Setting up CARRY-Matrix.\n";
-	CARRY.clear();
-	// First line of carry-matrix: reduced costs
-	CARRY.push_back(vector<my_rational>());
-	CARRY[0].push_back(0);
-	// Index set for basis columns
+	ldbg << "Setting up CARRY-Matrix and basis.\n";
+ 	CARRY.clear();
 	basis.clear();
-	for (unsigned i = 0; i < b.size(); i++)
+	// No input files given -> create new carry-matrix and basis
+	if (input_carry == "" && input_basis == "")
 	{
-		CARRY[0][0] -= b[i];
-		CARRY[0].push_back(0);
-		basis.push_back(i+1);
-	}
-	for (unsigned i = 1; i <= b.size(); i++)
-	{
+		// First line of carry-matrix: reduced costs
 		CARRY.push_back(vector<my_rational>());
-		CARRY[i].push_back(b[i-1]);
-		for (unsigned j = 1; j <= b.size(); j++)
+		CARRY[0].push_back(0);
+		for (unsigned i = 0; i < b.size(); i++)
 		{
-			if (i == j)
+			CARRY[0][0] -= b[i];
+			CARRY[0].push_back(0);
+			basis.push_back(i+1);
+		}
+		for (unsigned i = 1; i <= b.size(); i++)
+		{
+			CARRY.push_back(vector<my_rational>());
+			CARRY[i].push_back(b[i-1]);
+			for (unsigned j = 1; j <= b.size(); j++)
 			{
-				CARRY[i].push_back(1);
-			}
-			else
-			{
-				CARRY[i].push_back(0);
+				if (i == j)
+				{
+					CARRY[i].push_back(1);
+				}
+				else
+				{
+					CARRY[i].push_back(0);
+				}
 			}
 		}
 	}
+	else
+	{
+		string line;
+		ifstream infile;
+		// read carry
+		infile.open(input_carry.c_str(), ifstream::in);
+		unsigned cnt = 0;
+		while(getline(infile, line))
+		{
+			CARRY.push_back(vector<my_rational>());
+			istringstream iss(line);
+			string word;
+			while(iss >> word) {
+				CARRY[cnt].push_back((my_rational)word);
+			}
+			cnt++;
+		}
+		infile.close();
+		// read basis
+		infile.open(input_basis.c_str(), ifstream::in);
+		while(getline(infile, line))
+		{
+			int bb;
+			istringstream iss(line);
+			iss >> bb;
+			basis.push_back(bb);
+		}
+		infile.close();
+		ldbg.vec(basis, "basis");
+	}
 	ldbg.matrix(CARRY, "CARRY");
+
+	// Set startphase
+	phase = start_phase;
 
 	// Size of the problem. The real tableau would have size (m+1) x (n+1).
 	// The carry-matrix has size (m+1) x (m+1)
@@ -105,7 +141,6 @@ void Simplex::optimize()
 	int counter = 0;					// Counter to avoid infinite loops
 
 	optimal = false;
-	phase = 1;
 
 	unsigned s;							// Column-index of the column that will enter the basis
 	my_rational cost_s;					// Reduced cost of the column that will enter the basis
@@ -148,6 +183,9 @@ void Simplex::optimize()
 						if (basis[i] <= m)
 						{
 							lout << "PHASE 1: Basic feasible solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
+
+							write_to_file();
+
 							for (unsigned j = 0; j < n; j++)
 							{
 								ldbg << "~~ Checking column " << j << "\n";
@@ -163,7 +201,29 @@ void Simplex::optimize()
 								ldbg << "x[i][j] = " << X_s[i+1] << "\n";
 								if (X_s[i+1] != 0)
 								{
-									ldbg << "@TODO: Pivot with this element!\n";
+									ldbg.level = 3;
+									ldbg << "@TODO: Pivot with this element: r,s = " << i+1 << "," << CARRY[0].size()+j << "\n";
+
+									vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
+									Matrix::append_vec(CARRY_X_s, CARRY, X_s);	// and append the newly generated column
+
+									// Perform Pivot
+									full_tableau();
+									// Pivot element in the carry-matrix is at row r (since 0th first row holds the cost
+									// ) and either in one of the columns contained in CARRY or in the last column which is X_s
+									Matrix::pivot(CARRY_X_s, CARRY_X_s, i+1, CARRY[0].size());
+
+									// Update the basis: Basis values count with respect to the whole tableau!
+									basis[i] = CARRY[0].size()+j;
+									lout.vec(basis, "basis");
+
+									// Update carry matrix
+									for (unsigned i = 0; i < CARRY.size(); i++) {
+										for (unsigned j = 0; j < CARRY[i].size(); j++) {
+											CARRY[i][j] = CARRY_X_s[i][j];
+										}
+									}
+									full_tableau();
 									exit(EXIT_FAILURE);
 								}
 							}
@@ -207,6 +267,7 @@ void Simplex::optimize()
 						}
 						// At this point we can enter phase 2
 						phase = 2;
+						write_to_file();
 					}
 				} // while phase == 1
 				lout << "PHASE 1: Found basic feasible solution after " << counter << " iterations => continuing with PHASE 2!\n";
@@ -329,10 +390,6 @@ void Simplex::optimize()
 		}
 		counter++;
 	}
-}
-
-void Simplex::phase2()
-{
 }
 
 void Simplex::pricing(my_rational& cost_s, unsigned& s)
@@ -587,4 +644,23 @@ void Simplex::full_tableau()
 		Matrix::append_vec(TABLEAU, TABLEAU, X_s);
 	}
 	ldbg.matrix(TABLEAU, "TABLEAU");
+}
+
+void Simplex::write_to_file()
+{
+	// Dump carry matrix and basis vector to file for later use
+	ofstream cfile;
+	cfile.open("carry.dat");
+	for (unsigned e = 0; e < CARRY.size(); e++) {
+		for (unsigned f = 0; f < CARRY[e].size(); f++) {
+			cfile << (my_rational)CARRY[e][f] << "\t";
+		}
+		cfile << endl;
+	}
+	cfile.close();
+	cfile.open("basis.dat");
+	for (unsigned e = 0; e < basis.size(); e++) {
+		cfile << basis[e] << endl;
+	}
+	cfile.close();
 }

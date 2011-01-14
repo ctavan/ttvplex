@@ -93,6 +93,15 @@ class Simplex {
 	\sa
 **/
 		void full_tableau();
+/** \brief Dump carry matrix and basis vector to file for later use
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-14
+	\return void
+	\sa
+**/
+		void write_to_file();
+	
 
 	public:
 		Simplex(LPParser &l) : phase(1), lp(l), optimal(false), infeasible(false) {};
@@ -100,19 +109,23 @@ class Simplex {
 /** \brief Initialize the tableaus
 	
 		Initialize the tableaus for the revised simplex algorithm.
+		If the files input_carry and input_basis exist, the CARRY-matrix and the basis
+		are read from these files. This can be used to continue the simplex algorithm
+		from a given state.
 	
 	\author Christoph Tavan TU Berlin
 	\date 2010-12-25
+	\param string Filename of a carry-matrix-dump
+	\param string Filename of a basis-dump
 	\return void
 	\sa
 **/
-		void init();
+		void init(const string& input_carry, const string& input_basis, const int& start_phase = 1);
 
 
 		void optimize();
 		void objective();
 		void variables();
-		void phase2();
 
 		LPParser& lp;	//!< Reference to the lp object
 		unsigned m; //!< Number of rows of the initial matrix
