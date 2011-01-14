@@ -4,8 +4,8 @@ TTVPlex - A revised simplex implementation
 TTVPlex stands vor TavTraVuoSimplex and is an implementation of the revised 
 simplex algorithm which was programmed as an exercise during the university 
 course "Linear and Integer Programming (ADM II), WS 2010/11" at TU Berlin.
-For more information about the course visit
-  http://www.math.tu-berlin.de/coga/teaching/wt10/adm2/
+For more information about the course visit:
+http://www.math.tu-berlin.de/coga/teaching/wt10/adm2/
 
 
 Authors
@@ -15,6 +15,15 @@ Tuan Tran
 Quyen Vuong
 
 The code is (c) 2011 by the authors and distributed under the MIT license.
+
+
+Download
+--------
+The TTVPlex project is hosted on github:
+https://github.com/ctavan/ttvplex
+
+You can download the source as a tarball there or clone the the git repository:
+	git clone git://github.com/ctavan/ttvplex.git
 
 
 Installation
