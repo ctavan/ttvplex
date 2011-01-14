@@ -78,6 +78,7 @@ Some Notes
 	Implementing the lexicographic anti-cycling rule might be more efficient.
 *	There might be problems, if the upper bound of a variable is negative... 
 	Then one should substitute y = -x.
+*	There also seem to be some problems if an LP contains unbounded variables.
 
 
 Licence

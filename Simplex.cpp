@@ -270,8 +270,6 @@ void Simplex::optimize()
 						A.erase(A.begin()+i);
 						ldbg.matrix(A, "A");
 
-						lout << "PHASE 1: New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
-
 						ldbg.matrix(CARRY, "CARRY");
 						CARRY.erase(CARRY.begin()+i+1);
 						m--;
@@ -281,6 +279,8 @@ void Simplex::optimize()
 						}
 						ldbg.matrix(CARRY, "CARRY");
 						full_tableau();
+
+						lout << "PHASE 1: New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
 
 						ldbg << "Removed row " << i+1 << " from the system!\n";
 						i = 0;
