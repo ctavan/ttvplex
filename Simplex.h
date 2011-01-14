@@ -85,7 +85,7 @@ class Simplex {
 	\sa
 **/
 		void choose_pivot(unsigned& r, const vector<my_rational>& col);
-/** \brief Generates and prints the current full tableau
+/** \brief Generates and prints the current full tableau (only if verbosity >= 3)
 	
 	\author Christoph Tavan TU Berlin
 	\date 2011-01-11
@@ -121,10 +121,31 @@ class Simplex {
 	\sa
 **/
 		void init(const string& input_carry, const string& input_basis, const int& start_phase = 1);
-
-
+/** \brief The main simplex algorithm
+	
+		Optimizes the given LP using the revised simplex algorithm.
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-14
+	\return void
+	\sa
+**/
 		void optimize();
+/** \brief Prints out the objective value
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-14
+	\return void
+	\sa
+**/
 		void objective();
+/** \brief Prints out the nonzero variables and their values
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-14
+	\return void
+	\sa
+**/
 		void variables();
 
 		LPParser& lp;	//!< Reference to the lp object

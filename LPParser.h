@@ -364,6 +364,14 @@ struct LPVarlist
 		ldbg << "Adding slack/surplus-variable: '" << name << "', now having " << ns << " slack/surplus variable(s) in the system.\n";
 		return name;
 	}
+/** \brief Rename a variable that has a lower bound (the variable is being offset)
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-08
+	\param string& Name of the variable
+	\return Name of the bounded variable
+	\sa
+**/
 	string replaceBounded(const string& name)
 	{
 		// First determine the slack/surplus-variable prefix (must be unique)
@@ -383,6 +391,14 @@ struct LPVarlist
 		elements[i] = bound_prefix + name;
 		return elements[i];
 	}
+/** \brief Splits an anbounded variable into positive and negative part: x = xplus - xminus
+	
+	\author Christoph Tavan TU Berlin
+	\date 2011-01-14
+	\param string& Name of the variable
+	\return void
+	\sa
+**/
 	void splitPlusMinus(const string& name)
 	{
 		// First determine the slack/surplus-variable prefix (must be unique)

@@ -57,6 +57,13 @@ Debian/Ubuntu:
 		make
 
 
+Documentation
+-------------
+You can generate a doxygen documentation of the code by issuing the command:
+	make doxy
+The documentation is then located in the `docs`-folder.
+
+
 Usage
 -----
 You can get a list of all available commandline-options by issuing:

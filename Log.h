@@ -29,7 +29,7 @@ class Log: public ostream{
 		Log(ostream& out, int level);
 		~Log();
 
-		int level;
+		int level;	//!< Loglevel of the instance. level must be > 0 for any output to appear.
 
 		template <typename T> Log& operator<<(const T& value)
 		{
@@ -38,16 +38,6 @@ class Log: public ostream{
 			}
 			return *this;
 		}
-		// Log& operator<< (const string& value)
-		// {
-		// 	(ostream&)*this << '*' << value << '*';
-		// 	return *this;
-		// }
-		// Log& operator<< (const char* cstr)
-		// {
-		// 	(ostream&)*this << '(' << cstr << ')';
-		// 	return *this;
-		// }
 
 /** \brief Dump some string.
 	
