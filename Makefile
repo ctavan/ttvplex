@@ -6,7 +6,8 @@
 # CLN_LIB = /opt/local/lib/libcln.a
 # Location of the compiled GMP library which is required by CLN
 GMP_INC = /opt/local/include/
-GMP_LIB = /opt/local/lib/libgmp.a /opt/local/lib/libgmpxx.a
+GMP_LIB = /opt/local/lib/
+GMP_LDFLAGS = -lgmp -lgmpxx
 
 # Include paths that should be searched
 INCLUDE = -I$(GMP_INC) -I./
@@ -15,16 +16,16 @@ CC = g++
 # Compiler flags
 CFLAGS = -O2 -g -Wall
 # Linker flags
-LDFLAGS = -lm
+LDFLAGS = -lm $(GMP_LDFLAGS)
 # Paths of third party libraries that are used
-LIBS = $(GMP_LIB)
+LIBS = -L$(GMP_LIB)
 
 # Name of the executable
 PROGRAMNAME = ttvplex
 
 # Default target invoked by 'make' or 'make default'
 default: main.cpp main.o global.o Simplex.o Log.o Matrix.o LPParser.o
-	$(CC) $(CFLAGS) $(INCLUDE) $(LDFLAGS) -o $(PROGRAMNAME) main.o global.o Simplex.o Log.o Matrix.o LPParser.o $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDE) $(LIBS) $(LDFLAGS) -o $(PROGRAMNAME) main.o global.o Simplex.o Log.o Matrix.o LPParser.o
 
 # Dependencies
 main.o: main.cpp main.h
