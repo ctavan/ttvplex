@@ -408,7 +408,7 @@ void LPParser::boundconstraints()
 		{
 			continue;
 		}
-		// Variable x bounded from. Since it has a finite upper bound -> Add constraint of form x < 20
+		// Variable x bounded from below. Since it has a finite upper bound -> Add constraint of form x < 20
 		if (!bounds[i].lower_unbound && !bounds[i].upper_unbound)
 		{
 			LPConstraint constr;
@@ -426,7 +426,7 @@ void LPParser::boundconstraints()
 		{
 			my_rational lower = bounds[i].lower;
 			string oldname = bounds[i].name;
-			string newname = variables.replaceBounded(bounds[i].name);
+			string newname = variables.replace_bounded(bounds[i].name, lower);
 			ldbg << "Variable '" << oldname << "' has nonzero lower bound: " << lower << "\n";
 			ldbg << "Adding new variable " << newname << " = " << oldname << " + " << -1*lower << "\n";
 
@@ -466,7 +466,7 @@ void LPParser::boundconstraints()
 			ldbg << "Variable " << bounds[i].name << " is unbounded.\n";
 
 			// Split variable
-			variables.splitPlusMinus(bounds[i].name);
+			variables.split_plus_minus(bounds[i].name);
 
 			string oldname = bounds[i].name;
 			string pname = variables.split_prefix_p + oldname;
@@ -522,7 +522,7 @@ void LPParser::slacksurplus()
 			continue;
 		}
 		// Get a unique name for the slack/surplus variable
-		string name = variables.addSlackSurplus();
+		string name = variables.add_slack_surplus();
 		// Create a new variable and add it to the constraint
 		LPVariable slacksurplus;
 		slacksurplus.name = name;

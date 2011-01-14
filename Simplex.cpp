@@ -238,7 +238,6 @@ void Simplex::optimize()
 									CARRY[ii][jj] = CARRY_X_s[ii][jj];
 								}
 							}
-							lout << "Monitoring xi: " << CARRY[0][0] << "\n";
 							// full_tableau();
 							// exit(EXIT_FAILURE);
 						} // for
@@ -331,6 +330,7 @@ void Simplex::optimize()
 			if (phase == 2 && optimal)
 			{
 				lout << "PHASE 2: Found optimal solution after " << counter << " iterations!\n";
+				write_to_file();
 			}
 			ldbg.matrix(CARRY, "CARRY");
 			ldbg.matrix(CARRY, "CARRY", true);
@@ -621,6 +621,8 @@ void Simplex::objective()
 	if (lp.objective.direction == LPObjective::OBJ_MAX) {
 		obj *= -1;
 	}
+	// Add offset
+	obj += lp.objective.offset;
 	lout << "Objective: " << obj << " = " << (my_float)obj << "\n";
 }
 void Simplex::variables()
@@ -634,12 +636,15 @@ void Simplex::variables()
 	lout << "Variable name\t\t" << "Solution value\n";
 	for (unsigned i = 0; i < basis.size(); i++)
 	{
+		unsigned index = basis[i]-CARRY[0].size();
+		my_rational val = CARRY[i+1][0];
+		val += lp.variables.offsets[index];	// Add offset again if variable was bounded
 		// Don't show 0-variables
-		if (CARRY[i+1][0] == 0)
+		if (val == 0)
 		{
 			continue;
 		}
-		lout << lp.variables.elements[basis[i]-CARRY[0].size()] << "\t\t\t" << CARRY[i+1][0] << " (" << (my_float)CARRY[i+1][0] << ")\n";
+		lout << lp.variables.elements[index] << "\t\t\t" << val << " (" << (my_float)val << ")\n";
 	}
 	lout << "All other variables are 0.\n";
 }

@@ -277,6 +277,7 @@ struct LPBound
 struct LPVarlist
 {
 	vector<string> elements;	//!< Vector of variable names
+	vector<my_rational> offsets;	//!< Vector variable offsets for bounded variables
 	int ns;						//!< Number of slack and surplus variables
 	string s_prefix;			//!< String prefix of slack and surplus variables
 	int nbound;					//!< Number of variables that have been introduced for nonzero lower bounds
@@ -308,9 +309,10 @@ struct LPVarlist
 	int add(const string& name)
 	{
 		int i;
-		if ((i = indexOf(name)) < 0)
+		if ((i = index_of(name)) < 0)
 		{
 			elements.push_back(name);
+			offsets.push_back(0);
 			i = elements.size()-1;
 		}
 		return i;
@@ -323,7 +325,7 @@ struct LPVarlist
 	\return index of the variable or -1 if the variable doesnt exist
 	\sa
 **/
-	int indexOf(const string& name, const bool& containing = false)
+	int index_of(const string& name, const bool& containing = false)
 	{
 		for (unsigned i = 0; i < elements.size(); i++)
 		{
@@ -342,16 +344,16 @@ struct LPVarlist
 	\return Name of the slack/surplus variable
 	\sa
 **/
-	string addSlackSurplus()
+	string add_slack_surplus()
 	{
 		// First determine the slack/surplus-variable prefix (must be unique)
 		if (ns < 1)
 		{
 			ldbg << "Determining unique slack variable prefix.";
 			// Append '_' to the s_prefix, until it is assured, that unique slack/surplus-variable-names will be generated
-			while (indexOf(s_prefix, true) >= 0)
+			while (index_of(s_prefix, true) >= 0)
 			{
-				ldbg << "Is there a variable containing the slack/surplus-prefix '" << s_prefix << "'?" << indexOf(s_prefix, true) << "\n";
+				ldbg << "Is there a variable containing the slack/surplus-prefix '" << s_prefix << "'?" << index_of(s_prefix, true) << "\n";
 				s_prefix += "_";
 			}
 			ldbg << "Found unique slack/surplus-prefix '" << s_prefix << "'\n";
@@ -361,6 +363,7 @@ struct LPVarlist
 		out << ns++;
 		name = s_prefix + out.str();
 		elements.push_back(name);
+		offsets.push_back(0);
 		ldbg << "Adding slack/surplus-variable: '" << name << "', now having " << ns << " slack/surplus variable(s) in the system.\n";
 		return name;
 	}
@@ -369,26 +372,28 @@ struct LPVarlist
 	\author Christoph Tavan TU Berlin
 	\date 2011-01-08
 	\param string& Name of the variable
+	\param my_rational& Offset of the variable
 	\return Name of the bounded variable
 	\sa
 **/
-	string replaceBounded(const string& name)
+	string replace_bounded(const string& name, const my_rational& offset)
 	{
 		// First determine the slack/surplus-variable prefix (must be unique)
 		if (nbound < 1)
 		{
 			ldbg << "Determining unique bound variable prefix.\n";
 			// Append '_' to the s_prefix, until it is assured, that unique slack/surplus-variable-names will be generated
-			while (indexOf(bound_prefix, true) >= 0)
+			while (index_of(bound_prefix, true) >= 0)
 			{
-				ldbg << "Is there a variable containing the slack/surplus-prefix '" << bound_prefix << "'?" << indexOf(bound_prefix, true) << "\n";
+				ldbg << "Is there a variable containing the slack/surplus-prefix '" << bound_prefix << "'?" << index_of(bound_prefix, true) << "\n";
 				bound_prefix += "_";
 			}
 			ldbg << "Found unique bound-prefix '" << bound_prefix << "'\n";
 		}
 		nbound++;
-		int i = indexOf(name);
+		int i = index_of(name);
 		elements[i] = bound_prefix + name;
+		offsets[i] = offset;
 		return elements[i];
 	}
 /** \brief Splits an anbounded variable into positive and negative part: x = xplus - xminus
@@ -399,33 +404,34 @@ struct LPVarlist
 	\return void
 	\sa
 **/
-	void splitPlusMinus(const string& name)
+	void split_plus_minus(const string& name)
 	{
 		// First determine the slack/surplus-variable prefix (must be unique)
 		if (nsplit < 1)
 		{
 			ldbg << "Determining unique bound variable prefix.\n";
 			// Append '_' to the split_prefix_p, until it is assured that unique variables are generated
-			while (indexOf(split_prefix_p, true) >= 0)
+			while (index_of(split_prefix_p, true) >= 0)
 			{
-				ldbg << "Is there a variable containing the split-prefix '" << split_prefix_p << "'?" << indexOf(split_prefix_p, true) << "\n";
+				ldbg << "Is there a variable containing the split-prefix '" << split_prefix_p << "'?" << index_of(split_prefix_p, true) << "\n";
 				split_prefix_p += "_";
 			}
 			ldbg << "Found unique bound-prefix '" << split_prefix_p << "'\n";
 			// Append '_' to the split_prefix_p, until it is assured that unique variables are generated
-			while (indexOf(split_prefix_m, true) >= 0)
+			while (index_of(split_prefix_m, true) >= 0)
 			{
-				ldbg << "Is there a variable containing the split-prefix '" << split_prefix_m << "'?" << indexOf(split_prefix_m, true) << "\n";
+				ldbg << "Is there a variable containing the split-prefix '" << split_prefix_m << "'?" << index_of(split_prefix_m, true) << "\n";
 				split_prefix_m += "_";
 			}
 			ldbg << "Found unique bound-prefix '" << split_prefix_m << "'\n";
 		}
 		nsplit++;
-		int i = indexOf(name);
+		int i = index_of(name);
 		elements[i] = split_prefix_p + name;
 		string minus_name;
 		minus_name = split_prefix_m + name;
 		elements.push_back(minus_name);
+		offsets.push_back(0);
 	}
 /** \brief Convenience method to dump an object of type LPVarlist
 	
