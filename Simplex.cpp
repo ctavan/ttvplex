@@ -199,13 +199,13 @@ void Simplex::optimize()
 						// Search for a nonzero, nonbasic column in the i'th row
 						for (unsigned j = 0; j < n; j++)
 						{
-							lout << "~~ Checking column " << j << "\n";
+							linf << "~~ Checking column " << j << "\n";
 							// Check if column j is a basic column
 							if (is_basic(j))
 							{
 								continue;
 							}
-							lout << "~~ Generating non-basic column " << j << "\n";
+							linf << "~~ Generating non-basic column " << j << "\n";
 							// Generate j'th column
 							my_rational cost = redcost(j);
 							generate_col(CARRY[0].size()+j, cost);
