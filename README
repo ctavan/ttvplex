@@ -1,7 +1,92 @@
-Revised Simplex implementation
+TTVPlex - A revised simplex implementation
+==========================================
+
+TTVPlex stands vor TavTraVuoSimplex and is an implementation of the revised 
+simplex algorithm which was programmed as an exercise during the university 
+course "Linear and Integer Programming (ADM II), WS 2010/11" at TU Berlin.
+For more information about the course visit
+  http://www.math.tu-berlin.de/coga/teaching/wt10/adm2/
 
 
-NOTES
-=====
- * We implemented Blands anti-cycling rule since it is easy to implement. Implementing the lexicographic anti-cycling rule might be more efficient.
- * There might be problems, if the upper bound of a variable is negative... Then one should substitute y = -x.
+Authors
+-------
+Christoph Tavan
+Tuan Tran
+Quyen Vuong
+
+The code is (c) 2011 by the authors and distributed under the MIT license.
+
+
+Installation
+------------
+Requirements:
+*	TTVPLex requires a recent version of the GNU C++ compiler g++ to be
+	installed on the system.
+*	TTVPlex makes use of The GNU Multiple Precision Arithmetic Library (GMP).
+	GMP needs either to be installed on the system or be compiled locally.
+
+Mac OS X:
+1.	It is easiest to use Macports (http://www.macports.org/) to install GMP:
+		sudo port install gmp
+2.	Create a symbolic link to the correct Makefile:
+		ln -s Makefile.macosx Makefile
+3.	Compile:
+		make
+
+Debian/Ubuntu:
+1.	You can install GMP through apt-get. If you do so, use the makefile 
+	`Makefile.macosx` and adjust the `GMP_INC` and `GMP_LIB` paths 
+	accordingly.
+	If you don't have super-user privileges, follow these steps:
+2.	Create a symbolic link to the correct Makefile:
+		ln -s Makefile.debian Makefile
+3.	Compile:
+		make
+
+
+Usage
+-----
+You can get a list of all available commandline-options by issuing:
+	./ttvplex -h
+Assuming you want to solve the LP-file located at `examples/example3.lp`, use:
+	./ttvplex -powx -v 1 -i examples/example3.lp
+You can increase the verbosity of the output:
+	./ttvplex -powx -v 2 -i examples/example3.lp
+
+
+Some Notes
+----------
+*	Currently for each row in the coefficient-matrix an artificial variable
+	is created for phase 1 of the simplex algorithm. The number of variables
+	could greatly be reduced, if artificial variables would only be introduced
+	for constraints other than <= (where a slack variable can play the role
+	of the artificial variable).
+*	We implemented Blands anti-cycling rule since it is easy to implement. 
+	Implementing the lexicographic anti-cycling rule might be more efficient.
+*	There might be problems, if the upper bound of a variable is negative... 
+	Then one should substitute y = -x.
+
+
+Licence
+-------
+The MIT License
+
+Copyright (c) 2011 Christoph Tavan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
