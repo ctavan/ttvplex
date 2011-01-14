@@ -21,4 +21,6 @@ extern Log lerr;	//!< Error output (not controlled by verbosity), shown if verbo
 extern Log linf;	//!< Info output, shown if verbosity >= 2
 extern Log ldbg;	//!< Debug output, shown if verbosity >= 3
 
+extern int max_iterations; //!< Maximum number of iterations to be performed
+
 #endif

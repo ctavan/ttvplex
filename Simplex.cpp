@@ -97,13 +97,12 @@ void Simplex::init()
 	// There are n cost-coefficients
 	m = A.size();		// Rows of the problem
 	n = A[0].size();	// Columns of the problem
-	lout << "Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
+	lout << "\nDimension of the coefficient matrix A: " << m << " x " << n << "\n\n";
 }
 
 void Simplex::optimize()
 {
 	int counter = 0;					// Counter to avoid infinite loops
-	const int max_iterations = 100;	// Maximum number of iterations to be performed
 
 	optimal = false;
 	phase = 1;
@@ -117,6 +116,10 @@ void Simplex::optimize()
 	{
 		ldbg << "=============== Iteration " << counter << " / " << max_iterations << " ===============\n";
 
+		if (counter%100 == 0) {
+			lout << "PHASE " << phase << ": iteration " << counter << "\n";
+		}
+
 		// In the beginning of each cycle we set optimal = false. If we get optimal in this cycle
 		// this variable will be set to true by the pricing routine.
 		optimal = false;
@@ -125,13 +128,13 @@ void Simplex::optimize()
 
 		// Pricing
 		pricing(cost_s, s);	// Index of the column that will enter the basis wrt. the matrix A
-		linf << "Pricing operation selected column: " << s << " with reduced cost " << cost_s << "\n";
+		linf << "Pricing operation selected column s = " << s << " with reduced cost " << cost_s << " for pivoting.\n";
 		if (optimal == true)
 		{
 			// Phase 1: We reached optimality but objective > 0 => Infeasible. (@see Case 2 in Papadimitriou/Steiglitz, p. 56)
 			if (phase == 1 && CARRY[0][0] < 0)
 			{
-				lout << "PHASE 1: All minimum reduced costs > 0 but objective xi = " << CARRY[0][0] << " > 0 => Infeasible!" << "\n";
+				lout << "PHASE 1: All minimum reduced costs > 0 but objective xi = " << CARRY[0][0] << " > 0 => Infeasible! (after " << counter << " iterations)" << "\n";
 				infeasible = true;
 			}
 			// Phase 1: Objective is 0 -> Check if there are artificial variables left in the basis
@@ -145,7 +148,6 @@ void Simplex::optimize()
 						if (basis[i] <= m)
 						{
 							lout << "PHASE 1: Basic feasible solution found, but basis column b[" << i << "] = " << basis[i] << " is an artificial variable\n";
-							lout << "@TODO\n";
 							for (unsigned j = 0; j < n; j++)
 							{
 								ldbg << "~~ Checking column " << j << "\n";
@@ -165,7 +167,7 @@ void Simplex::optimize()
 									exit(EXIT_FAILURE);
 								}
 							}
-							ldbg << "PHASE 1: All x_ij = 0 in row i = " << i+1 << "\n";
+							lout << "PHASE 1: All x_ij = 0 in row i = " << i+1 << "\n";
 							ldbg << "erasing row " << i+1 << "\n";
 
 							ldbg.vec(basis, "basis");
@@ -188,7 +190,7 @@ void Simplex::optimize()
 							A.erase(A.begin()+i);
 							ldbg.matrix(A, "A");
 
-							lout << "New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
+							lout << "PHASE 1: New Dimension of the coefficient matrix A: " << m << " x " << n << "\n";
 
 							ldbg.matrix(CARRY, "CARRY");
 							CARRY.erase(CARRY.begin()+i+1);
@@ -207,19 +209,19 @@ void Simplex::optimize()
 						phase = 2;
 					}
 				} // while phase == 1
-				lout << "PHASE 1: Basic feasible solution found => continuing with PHASE 2!" << "\n";
+				lout << "PHASE 1: Found basic feasible solution after " << counter << " iterations => continuing with PHASE 2!\n";
 
 				phase = 2;
 				optimal = false;
-				lout << "===================================================\n";
-				lout << "===================================================\n";
-				lout << "PHASE 2: Starting\n";
+				lout << "\n===================================================\n";
+				lout << "===================================================\n\n";
+				lout << "PHASE 2: Starting\n\n";
 				// Remove artificial variables
 				
 
 				// Calculate new (real) reduced cost
 				// loop over rows
-				linf.matrix(CARRY, "CARRY");
+				ldbg.matrix(CARRY, "CARRY");
 				for (unsigned j = 0; j < basis.size(); j++)
 				{
 					// c[basis[i]-CARRY[0].size()]
@@ -245,16 +247,16 @@ void Simplex::optimize()
 				}
 				ldbg << "\nCost is: " << cost << "\n";
 				CARRY[0][0] = cost;
-				linf.matrix(CARRY, "CARRY");
+				ldbg.matrix(CARRY, "CARRY");
 				continue;
 			} // phase == 1 && CARRY[0][0] == 0
 			if (phase == 2 && optimal)
 			{
-				ldbg << "PHASE 2 optimal?\n";
+				lout << "PHASE 2: Found optimal solution after " << counter << " iterations!\n";
 			}
-			linf.matrix(CARRY, "CARRY");
-			linf.matrix(CARRY, "CARRY", true);
-			linf.vec(basis, "basis");
+			ldbg.matrix(CARRY, "CARRY");
+			ldbg.matrix(CARRY, "CARRY", true);
+			ldbg.vec(basis, "basis");
 			if (infeasible || optimal)
 			{
 				break;
@@ -280,8 +282,25 @@ void Simplex::optimize()
 		// Choose pivot element, i.e. determine row r. Pivot element is then x_rs
 		choose_pivot(r, X_s);
 
-		linf << "=====> Let column basis[" << r-1 << "] = " << basis[r-1] << " leave the basis and column " << s << " enter.\n";
-		linf << "Pivot element determined: r,s = " << r << "," << s << " (" << (r+1) << "," << (s+1) << ")\n";
+		ldbg << "=====> Let column basis[" << r-1 << "] = " << basis[r-1] << " leave the basis and column " << s << " enter.\n";
+		string enter;
+		string leave;
+		if (s < CARRY[0].size()) {
+			stringstream out;
+			out << s;
+			enter = "artificial_" + out.str();
+		} else {
+			enter = lp.variables.elements[s-CARRY[0].size()];
+		}
+		if (basis[r-1] < CARRY[0].size()) {
+			stringstream out;
+			out << basis[r-1];
+			leave = "artificial_" + out.str();
+		} else {
+			leave = lp.variables.elements[basis[r-1]-CARRY[0].size()];
+		}
+		linf << "=====> Let '" << enter << "' enter the basis and '" << leave << "' leave.\n";
+		linf << "=====> Pivot element: r,s = " << r << "," << s << " (" << (r+1) << "," << (s+1) << ")\n\n";
 
 		vector< vector<my_rational> > CARRY_X_s;		// Make a copy of the carry matrix
 		Matrix::append_vec(CARRY_X_s, CARRY, X_s);	// and append the newly generated column
@@ -304,7 +323,7 @@ void Simplex::optimize()
 			}
 		}
 
-		if (counter > max_iterations) {
+		if (max_iterations > 0 && counter > max_iterations) {
 			lerr << "Still no result after max_iterations\n";
 			exit(EXIT_FAILURE);
 		}
@@ -509,7 +528,7 @@ void Simplex::choose_pivot(unsigned& r, const vector<my_rational>& col)
 	}
 	r = (unsigned)rtemp;
 	r++;
-	linf << "r = " << r << " seems to be a suitable pivot element\n";
+	linf << "Bland's rule selected row r = " << r << " for pivoting.\n";
 }
 
 void Simplex::objective()
@@ -525,7 +544,10 @@ void Simplex::objective()
 		// obj = x_basic * cost_basic
 		obj += CARRY[i+1][0]*c[basis[i]-CARRY[0].size()];
 	}
-	lout << "Objective: " << obj << " = (" << (my_float)obj << ")\n";
+	if (lp.objective.direction == LPObjective::OBJ_MAX) {
+		obj *= -1;
+	}
+	lout << "Objective: " << obj << " = " << (my_float)obj << "\n";
 }
 void Simplex::variables()
 {
@@ -538,6 +560,11 @@ void Simplex::variables()
 	lout << "Variable name\t\t" << "Solution value\n";
 	for (unsigned i = 0; i < basis.size(); i++)
 	{
+		// Don't show 0-variables
+		if (CARRY[i+1][0] == 0)
+		{
+			continue;
+		}
 		lout << lp.variables.elements[basis[i]-CARRY[0].size()] << "\t\t\t" << CARRY[i+1][0] << " (" << (my_float)CARRY[i+1][0] << ")\n";
 	}
 	lout << "All other variables are 0.\n";
@@ -545,6 +572,10 @@ void Simplex::variables()
 
 void Simplex::full_tableau()
 {
+	// Skip if not in debugging mode
+	if (ldbg.level == 0) {
+		return;
+	}
 	// Calculate the whole tableau (just for debugging)
 	vector< vector<my_rational> > TABLEAU;		// Generate the whole tableau
 	TABLEAU.clear();

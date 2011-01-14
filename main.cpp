@@ -39,6 +39,9 @@ int main(int argc, char** argv)
 		TCLAP::ValueArg<string> inputArg("i","input","Input LP file", true, "", "string");
 		cmd.add( inputArg );
 
+		TCLAP::ValueArg<int> maxitArg("m","maxit","Maximum number of iterations", false, 0, "int");
+		cmd.add( maxitArg );
+
 		TCLAP::SwitchArg display_problemArg("p","problem","Display problem?", false);
 		cmd.add( display_problemArg );
 
@@ -73,6 +76,7 @@ int main(int argc, char** argv)
 		}
 
 		input = inputArg.getValue();
+		max_iterations = maxitArg.getValue();
 
 		display_problem = display_problemArg.getValue();
 		display_objective = display_objectiveArg.getValue();
@@ -113,10 +117,12 @@ int main(int argc, char** argv)
 	}
 	if (display_objective)
 	{
+		lout << "\n";
 		smp.objective();
 	}
 	if (display_variables)
 	{
+		lout << "\n";
 		smp.variables();
 	}
 
