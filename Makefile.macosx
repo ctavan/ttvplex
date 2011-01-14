@@ -10,7 +10,7 @@ GMP_LIB = /opt/local/lib/
 GMP_LDFLAGS = -lgmp -lgmpxx
 
 # Include paths that should be searched
-INCLUDE = -I$(GMP_INC) -I./
+INCLUDE = -I$(GMP_INC) -I./libs/
 # C compiler command. We use the GNU C++ compiler
 CC = g++
 # Compiler flags
